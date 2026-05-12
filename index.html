@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+<meta name="referrer" content="no-referrer" />
+<title>Internal Tool — Einstein Moving</title>
+<style>
+  :root {
+    --orange: #EF8B22;
+    --orange-dark: #C66E10;
+    --orange-soft: #FDEFE0;
+    --ink: #1F1F1F;
+    --ink-soft: #4A4A4A;
+    --line: #E5E5E5;
+    --line-strong: #C8C8C8;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --green: #2D7D46;
+    --red: #B3261E;
+    --blue: #1A6FBF;
+    --muted: #6B6B6B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  header {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
+    color: white;
+    padding: 24px 32px 28px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.01em; }
+  header p { margin: 0; opacity: 0.92; font-size: 13.5px; max-width: 900px; }
+
+  main { padding: 0 32px 60px; max-width: 1400px; margin: 0 auto; }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-top: 18px;
+  }
+  section h2 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  section h2 .badge {
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  section .sub {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin: 0 0 14px;
+  }
+
+  /* Globals grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px 16px;
+    margin-top: 8px;
+  }
+  .input-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .input-block label {
+    font-size: 11.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .input-block input {
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: white;
+    width: 100%;
+  }
+  .input-block input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 2px var(--orange-soft);
+  }
+  .input-block .hint { font-size: 11px; color: var(--muted); }
+
+  .group-title {
+    margin: 16px 0 6px;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+
+  .triple {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .triple .sum {
+    font-size: 12px;
+    color: var(--muted);
+    padding-bottom: 8px;
+  }
+  .triple .sum.warn { color: var(--red); font-weight: 700; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--line);
+  }
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--orange-dark);
+    border-bottom-color: var(--orange);
+  }
+  .tab .pct {
+    font-size: 11px;
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .tab.active .pct { background: var(--orange-soft); color: var(--orange-dark); }
+  .tab.locked .pct { background: #ECECEC; }
+
+  /* Position matrix */
+  .matrix-wrap { overflow-x: auto; }
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 1100px;
+  }
+  table.matrix th, table.matrix td {
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.matrix th {
+    background: #F4F4F4;
+    color: var(--ink-soft);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--line-strong);
+  }
+  table.matrix th.left, table.matrix td.left { text-align: left; }
+  table.matrix tbody tr:hover { background: #FAFAF7; }
+  table.matrix td .cell-input {
+    border: 1px solid transparent;
+    background: transparent;
+    width: 70px;
+    text-align: right;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 6px;
+    border-radius: 3px;
+  }
+  table.matrix td .cell-input:focus {
+    outline: none;
+    border-color: var(--orange);
+    background: white;
+    box-shadow: 0 0 0 2px var(--orange-soft);
+  }
+  table.matrix td .cell-input.readonly {
+    color: var(--muted);
+    background: #F8F8F8;
+  }
+  table.matrix .pos-name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  table.matrix .pos-name.hof { color: var(--muted); font-style: italic; }
+  table.matrix .delta-pos { color: var(--green); font-weight: 600; }
+  table.matrix .delta-neg { color: var(--red); font-weight: 600; }
+  table.matrix .delta-zero { color: var(--muted); }
+  table.matrix tfoot td {
+    background: #F8F8F8;
+    font-weight: 700;
+    border-top: 2px solid var(--line-strong);
+  }
+  table.matrix .group-divider th {
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    text-align: left;
+    padding: 4px 10px;
+    font-size: 10.5px;
+  }
+
+  /* Aggregate cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .stat .label {
+    font-size: 11.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .stat .big {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 4px 0 2px;
+  }
+  .stat .delta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat.warn { background: #FEF6E6; border-color: #F4D27B; }
+  .stat.warn .label { color: #8B5A0A; }
+  .stat.good { background: #EAF6EE; border-color: #B7D9C2; }
+  .stat.good .label { color: #1E5C32; }
+  .stat.bad { background: #FBEAE9; border-color: #EBB8B4; }
+  .stat.bad .label { color: #842620; }
+
+  /* Side-by-side */
+  table.sxs {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  table.sxs th, table.sxs td {
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.sxs th.left, table.sxs td.left { text-align: left; font-weight: 600; }
+  table.sxs th {
+    background: #F4F4F4;
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  table.sxs th.scenario { color: var(--orange-dark); }
+  table.sxs .row-label { color: var(--muted); font-size: 11.5px; text-transform: uppercase; }
+
+  /* Mover view */
+  .mover-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .mover-controls select {
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: white;
+  }
+  .announce {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-top: 6px;
+  }
+  .announce h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    color: var(--orange-dark);
+  }
+  .announce .lede {
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+    font-size: 13.5px;
+  }
+  table.announce-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  table.announce-grid th, table.announce-grid td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  table.announce-grid th {
+    background: #F4F4F4;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+  table.announce-grid .perf-low { background: #FFF7EC; }
+  table.announce-grid .perf-med { background: #FEF1DC; }
+  table.announce-grid .perf-high { background: #FDE6C4; }
+  table.announce-grid .col-perf { font-weight: 700; }
+  table.announce-grid .raise-pos { color: var(--green); font-weight: 700; }
+  table.announce-grid .raise-neg { color: var(--red); font-weight: 700; }
+  table.announce-grid .raise-zero { color: var(--muted); }
+  .announce-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Export buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn:hover { background: var(--orange-dark); }
+  .btn.secondary {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+  }
+  .btn.secondary:hover { background: var(--bg); }
+  .btn.danger {
+    background: white;
+    color: var(--red);
+    border: 1px solid var(--red);
+  }
+  .btn.danger:hover { background: #FBEAE9; }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+  /* Tooltip */
+  .tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 4px;
+    border: 1px solid var(--orange);
+  }
+  .tip .tip-body {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    background: #1F1F1F;
+    color: white;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.55;
+    text-align: left;
+    z-index: 1000;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    pointer-events: none;
+    transition: opacity 0.15s, visibility 0.15s;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .tip .tip-body::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1F1F1F;
+  }
+  .tip:hover .tip-body, .tip:focus .tip-body { visibility: visible; opacity: 1; }
+  .tip .tip-body strong { color: #FFD9A8; }
+  .tip-flag { color: #FFD180; font-weight: 700; }
+
+  @media (max-width: 760px) {
+    main { padding: 0 16px 40px; }
+    header { padding: 18px 16px; }
+    section { padding: 16px; }
+    table.matrix { min-width: 900px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mover Compensation Scenario Modeler</h1>
+  <p>Toggle base + variable per position. See live impact on annual mover comp, gross margin, and what the announcement looks like to a mover at each tenure tier. Three scenarios you can flip between — A, B, C — plus the locked Current state.</p>
+</header>
+
+<main>
+
+  <!-- =========================== GLOBALS =========================== -->
+  <section>
+    <h2>Global Inputs <span class="badge">applies to all scenarios</span></h2>
+    <p class="sub">Set the financial baseline, performance distribution, and L/M/H pay multipliers. Defaults reflect Q1 2026 known values where available — adjust to match Ben's confirmed numbers.</p>
+
+    <div class="group-title">Financial Baseline</div>
+    <div class="grid">
+      <div class="input-block">
+        <label>Annual Revenue</label>
+        <input type="number" id="revenue" value="24000000" step="500000" />
+        <span class="hint">Default: $24M (run-rate)</span>
+      </div>
+      <div class="input-block">
+        <label>AGM % of Revenue</label>
+        <input type="number" id="agmPct" value="53" step="1" />
+        <span class="hint">AGM = Revenue − COGS. Confirm with Ben.</span>
+      </div>
+      <div class="input-block">
+        <label>AGM $ (auto)</label>
+        <input type="number" id="agmDollars" readonly />
+        <span class="hint">= Revenue × AGM %</span>
+      </div>
+      <div class="input-block">
+        <label>All Other Annual Comp $</label>
+        <input type="number" id="otherComp" value="0" step="100000" />
+        <span class="hint">Managers + ops + leadership comp. Lets total-comp ÷ AGM be meaningful.</span>
+      </div>
+      <div class="input-block">
+        <label>Comp-to-AGM Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>Read this before relying on the ceiling card.</strong><br/>
+          The philosophy doc states: <em>"if comp-to-AGM climbs above ~16%, we reassess."</em> But it doesn't fully specify which comp cohort. Three possible reads:<br/><br/>
+          <span class="tip-flag">1.</span> All-employee comp ÷ AGM — likely too broad (mathematically blows past 16% just from mover payroll).<br/>
+          <span class="tip-flag">2.</span> Manager + leadership salaries ÷ AGM — matches the 13.4% YoY figure Ben quoted on 5/11. Probably the right read.<br/>
+          <span class="tip-flag">3.</span> Salaried + bonus-eligible comp pool ÷ AGM — possibility worth checking.<br/><br/>
+          <strong>Action:</strong> confirm with Ben before treating the ceiling card as a hard "go / no-go." For now, the cleanest mover-only affordability metric is <strong>Mover Comp ÷ Revenue</strong> (industry typical 30–40%).
+        </span></span></label>
+        <input type="number" id="ceilingPct" value="16" step="0.5" />
+        <span class="hint">Per philosophy doc — definition of "comp" needs Ben's confirmation. Hover the ? above.</span>
+      </div>
+    </div>
+
+    <div class="group-title">Performance Distribution (% of movers in each bucket)</div>
+    <div class="triple">
+      <div class="input-block">
+        <label>Low performers (%)</label>
+        <input type="number" id="distLow" value="20" step="5" />
+      </div>
+      <div class="input-block">
+        <label>Medium performers (%)</label>
+        <input type="number" id="distMed" value="60" step="5" />
+      </div>
+      <div class="input-block">
+        <label>High performers (%)</label>
+        <input type="number" id="distHigh" value="20" step="5" />
+      </div>
+      <div class="sum" id="distSum">Total: 100%</div>
+    </div>
+
+    <div class="group-title">Variable Pay Multipliers (% of max var earned at each tier)</div>
+    <div class="triple">
+      <div class="input-block">
+        <label>Low (% of max var)</label>
+        <input type="number" id="multLow" value="50" step="5" />
+      </div>
+      <div class="input-block">
+        <label>Medium (% of max var)</label>
+        <input type="number" id="multMed" value="80" step="5" />
+      </div>
+      <div class="input-block">
+        <label>High (% of max var)</label>
+        <input type="number" id="multHigh" value="100" step="5" />
+      </div>
+      <div class="sum"></div>
+    </div>
+  </section>
+
+  <!-- =========================== SCENARIOS =========================== -->
+  <section>
+    <h2>Position Matrix</h2>
+    <p class="sub">Edit Base $/hr, Var Max $/hr, Headcount, and Hours/yr per position. Current is locked — A/B/C are editable. Switch scenarios with the tabs.</p>
+
+    <div class="tabs" id="tabs">
+      <button class="tab locked active" data-tab="current">Current <span class="pct" id="pct-current">$0</span></button>
+      <button class="tab" data-tab="A">Scenario A <span class="pct" id="pct-A">$0</span></button>
+      <button class="tab" data-tab="B">Scenario B <span class="pct" id="pct-B">$0</span></button>
+      <button class="tab" data-tab="C">Scenario C <span class="pct" id="pct-C">$0</span></button>
+    </div>
+
+    <div class="matrix-wrap">
+      <table class="matrix" id="matrix">
+        <thead>
+          <tr>
+            <th class="left">Position</th>
+            <th>Headcount</th>
+            <th>Hrs/yr</th>
+            <th>Base $/hr</th>
+            <th>Var Max $/hr</th>
+            <th>TCC Low</th>
+            <th>TCC Med</th>
+            <th>TCC High</th>
+            <th>Raise % L</th>
+            <th>Raise % M</th>
+            <th>Raise % H</th>
+            <th>Avg $/hr</th>
+            <th>Annual Cost</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-body"></tbody>
+        <tfoot>
+          <tr>
+            <td class="left" colspan="2"><strong>Totals</strong></td>
+            <td id="foot-headcount" style="text-align:right"></td>
+            <td colspan="8"></td>
+            <td id="foot-avg"></td>
+            <td id="foot-total"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background:#EAF6EE;border:1px solid #B7D9C2"></span> raise %</span>
+      <span><span class="sw" style="background:#FBEAE9;border:1px solid #EBB8B4"></span> cut %</span>
+      <span>"Raise %" = vs current Total Cash Comp at same performance level (apples-to-apples).</span>
+    </div>
+  </section>
+
+  <!-- =========================== AGGREGATE =========================== -->
+  <section>
+    <h2>Aggregate Impact <span class="badge" id="agg-label">Scenario A vs Current</span></h2>
+    <p class="sub">Live calculation across all positions and performance buckets.</p>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="group-title">All Scenarios Side-by-Side</div>
+    <div style="overflow-x: auto;">
+      <table class="sxs" id="sxs">
+        <thead>
+          <tr>
+            <th class="left">Metric</th>
+            <th>Current</th>
+            <th class="scenario">A</th>
+            <th class="scenario">B</th>
+            <th class="scenario">C</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================== MOVER VIEW =========================== -->
+  <section>
+    <h2>Mover-View Preview <span class="badge">announcement preview</span></h2>
+    <p class="sub">What it looks like to a mover at this position when you announce the new program.</p>
+
+    <div class="mover-controls">
+      <label>Scenario:
+        <select id="mover-scenario">
+          <option value="A" selected>A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </label>
+      <label>Position:
+        <select id="mover-position"></select>
+      </label>
+      <label>Avg hourly tips (display only):
+        <select id="mover-tips">
+          <option value="5,8" selected>$5–8 / hr</option>
+          <option value="4,7">$4–7 / hr</option>
+          <option value="6,10">$6–10 / hr</option>
+          <option value="0,0">No tips shown</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="announce" id="announce"></div>
+  </section>
+
+  <!-- =========================== EXPORT =========================== -->
+  <section>
+    <h2>Export & Save</h2>
+    <p class="sub">Pull scenario data into a spreadsheet, share the URL with Paul + Ben, or save a snapshot.</p>
+    <div class="btn-row">
+      <button class="btn" id="copy-share-link">📎 Copy share link</button>
+      <button class="btn secondary" id="export-csv">Download CSV</button>
+      <button class="btn secondary" id="copy-state">Copy JSON</button>
+      <button class="btn secondary" id="paste-state">Paste JSON</button>
+      <button class="btn danger" id="reset-all">Reset all scenarios</button>
+    </div>
+    <p class="announce-note">
+      <strong>Share link</strong> = a single URL that loads your exact current state (all 3 scenarios + global inputs). Send to Paul or Ben in Slack — they open the link and see what you see. State is encoded in the URL, no backend required.<br/>
+      <strong>State also persists in your browser</strong> via localStorage — close the tab and your scenarios come back next time.
+      JSON copy/paste is the fallback if a link feels too long.
+    </p>
+  </section>
+
+</main>
+
+<!-- Shared-link banner — shown when state loaded from URL hash -->
+<div id="share-banner" style="display:none; position:fixed; top:16px; right:16px; background:#1F1F1F; color:white; padding:12px 16px; border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,0.18); z-index:9999; max-width:340px; font-size:13px; line-height:1.5;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+    <div>
+      <strong style="color:#FFD9A8;">📎 Loaded shared scenario</strong><br/>
+      <span style="opacity:0.85; font-size:12.5px;" id="share-banner-source">Someone shared this view with you. Your previous work is preserved — click Dismiss to keep this, or "Reset all scenarios" to start fresh.</span>
+    </div>
+    <button id="share-banner-dismiss" style="background:transparent; color:white; border:1px solid rgba(255,255,255,0.3); border-radius:4px; padding:4px 8px; font-size:12px; cursor:pointer; flex-shrink:0;">Dismiss</button>
+  </div>
+</div>
+
+<!-- Toast — shown on successful share link copy -->
+<div id="toast" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1F1F1F; color:white; padding:12px 20px; border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,0.2); z-index:9999; font-size:13.5px; font-weight:500;"></div>
+
+<script>
+// =============================================================================
+// DATA
+// =============================================================================
+const POSITIONS = [
+  { id: 'copilot', name: 'Co-Pilot',     base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
+  { id: 'jr',      name: 'Jr. Lead',     base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'master',  name: 'Master Lead',  base: 20.50, varMax: 3.00, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'general', name: 'Lead General', base: 20.50, varMax: 3.75, headcount:  11, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'hof',     name: 'HOF (legacy)', base: 21.68, varMax: 1.75, headcount:  14, hrsPerYr: 1900, group: 'legacy' },
+];
+
+const SCENARIOS = ['current', 'A', 'B', 'C'];
+const STORAGE_KEY = 'einstein-mover-comp-modeler-v1';
+
+// Default state: pre-loaded with Cameron's current working scenarios
+// (May 2026 cycle). A = flat $20 co-pilot + raises across leads.
+// B = $20 + variable co-pilot + same lead raises. C = no-change baseline.
+function defaultState() {
+  // Bake in Cameron's working snapshot so anyone opening fresh sees the
+  // active scenarios under discussion. Reset clears back to these.
+  return {
+    globals: {
+      revenue: 24000000,
+      agmPct: 50,
+      otherComp: 0,
+      ceilingPct: 16,
+      distLow: 20, distMed: 60, distHigh: 20,
+      multLow: 50, multMed: 80, multHigh: 100,
+    },
+    positions: {
+      copilot: { headcount: 147, hrsPerYr: 1700,
+        base:   { current: 18.00, A: 20.00, B: 20.00, C: 18.00 },
+        varMax: { current: 1.50,  A: 0.00,  B: 1.50,  C: 1.50  } },
+      jr:      { headcount: 21, hrsPerYr: 1900,
+        base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
+        varMax: { current: 1.75,  A: 2.25,  B: 2.25,  C: 1.75  } },
+      reg:     { headcount: 32, hrsPerYr: 1900,
+        base:   { current: 20.00, A: 21.50, B: 21.50, C: 20.00 },
+        varMax: { current: 2.00,  A: 2.50,  B: 2.50,  C: 2.00  } },
+      sr:      { headcount: 15, hrsPerYr: 1900,
+        base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
+        varMax: { current: 2.25,  A: 2.75,  B: 2.75,  C: 2.25  } },
+      master:  { headcount: 15, hrsPerYr: 1900,
+        base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
+        varMax: { current: 3.00,  A: 3.50,  B: 3.50,  C: 3.00  } },
+      general: { headcount: 11, hrsPerYr: 1900,
+        base:   { current: 20.50, A: 23.00, B: 23.00, C: 20.50 },
+        varMax: { current: 3.75,  A: 3.75,  B: 3.75,  C: 3.75  } },
+      hof:     { headcount: 14, hrsPerYr: 1900,
+        base:   { current: 21.68, A: 21.68, B: 21.68, C: 21.68 },
+        varMax: { current: 1.75,  A: 1.75,  B: 1.75,  C: 1.75  } },
+    },
+    activeTab: 'A',
+    moverPosition: 'copilot',
+    moverScenario: 'A',
+    moverTips: '5,8',
+  };
+}
+
+// URL hash takes precedence over localStorage (someone shared a link)
+let state = loadStateFromUrl() || loadState() || defaultState();
+let loadedFromShare = !!loadStateFromUrl();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+// ---- URL-encoded share link helpers ----
+// Encode the full state object into a URL-safe base64 string in the hash.
+// btoa is used after UTF-8-safe encoding via encodeURIComponent.
+function encodeStateToUrl(s) {
+  const json = JSON.stringify(s);
+  const utf8 = unescape(encodeURIComponent(json));
+  const b64 = btoa(utf8);
+  // URL-safe variant
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeStateFromUrl(encoded) {
+  try {
+    // Restore URL-safe → standard base64
+    let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const utf8 = atob(b64);
+    const json = decodeURIComponent(escape(utf8));
+    const parsed = JSON.parse(json);
+    if (!parsed.globals || !parsed.positions) return null;
+    return parsed;
+  } catch (e) { return null; }
+}
+
+function loadStateFromUrl() {
+  const hash = window.location.hash;
+  if (!hash || !hash.startsWith('#s=')) return null;
+  const encoded = hash.slice(3);
+  return decodeStateFromUrl(encoded);
+}
+
+function buildShareUrl() {
+  const base = window.location.origin + window.location.pathname;
+  return base + '#s=' + encodeStateToUrl(state);
+}
+
+function showToast(message, durationMs) {
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.style.display = 'block';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.style.display = 'none'; }, durationMs || 2400);
+}
+
+// =============================================================================
+// CALC
+// =============================================================================
+function calcPosition(posId, scenario) {
+  const p = state.positions[posId];
+  const g = state.globals;
+  const base = p.base[scenario];
+  const varMax = p.varMax[scenario];
+  const mL = g.multLow / 100, mM = g.multMed / 100, mH = g.multHigh / 100;
+  const dL = g.distLow / 100, dM = g.distMed / 100, dH = g.distHigh / 100;
+
+  // TCC at each perf level
+  const tccLow  = base + varMax * mL;
+  const tccMed  = base + varMax * mM;
+  const tccHigh = base + varMax * mH;
+
+  // Expected variable bonus per hour (distribution-weighted)
+  const expectedVarPerHr = varMax * (dL * mL + dM * mM + dH * mH);
+  const avgPerHr = base + expectedVarPerHr;
+
+  // Annual cost: base hours + expected variable
+  const annualBase = p.headcount * p.hrsPerYr * base;
+  const annualVar  = p.headcount * p.hrsPerYr * expectedVarPerHr;
+  const annualCost = annualBase + annualVar;
+
+  return {
+    base, varMax,
+    tccLow, tccMed, tccHigh,
+    expectedVarPerHr, avgPerHr,
+    annualBase, annualVar, annualCost,
+    headcount: p.headcount,
+    hrsPerYr: p.hrsPerYr,
+  };
+}
+
+function calcRaisePct(posId, scenario, level) {
+  // Apples-to-apples: new TCC at L vs current TCC at L
+  const cur = calcPosition(posId, 'current');
+  const sce = calcPosition(posId, scenario);
+  const curTcc = level === 'low' ? cur.tccLow : level === 'med' ? cur.tccMed : cur.tccHigh;
+  const sceTcc = level === 'low' ? sce.tccLow : level === 'med' ? sce.tccMed : sce.tccHigh;
+  if (curTcc === 0) return null;
+  return ((sceTcc - curTcc) / curTcc) * 100;
+}
+
+function calcScenarioTotals(scenario) {
+  let totalBase = 0, totalVar = 0, totalCost = 0, totalHeadcount = 0, totalHrs = 0;
+  POSITIONS.forEach(p => {
+    const r = calcPosition(p.id, scenario);
+    totalBase += r.annualBase;
+    totalVar  += r.annualVar;
+    totalCost += r.annualCost;
+    totalHeadcount += r.headcount;
+    totalHrs += r.headcount * r.hrsPerYr;
+  });
+  const avgPerHr = totalHrs > 0 ? totalCost / totalHrs : 0;
+  const g = state.globals;
+  const revenue = g.revenue;
+  const agmDollars = revenue * (g.agmPct / 100);
+  const otherComp = g.otherComp || 0;
+  const totalAllComp = totalCost + otherComp;
+  const moverCompToRev = revenue > 0 ? (totalCost / revenue) * 100 : 0;
+  const moverCompToAgm = agmDollars > 0 ? (totalCost / agmDollars) * 100 : 0;
+  const totalCompToAgm = agmDollars > 0 ? (totalAllComp / agmDollars) * 100 : 0;
+  const totalCompToRev = revenue > 0 ? (totalAllComp / revenue) * 100 : 0;
+  return { totalBase, totalVar, totalCost, totalHeadcount, totalHrs, avgPerHr,
+           moverCompToRev, moverCompToAgm, totalCompToAgm, totalCompToRev,
+           totalAllComp, otherComp, revenue, agmDollars };
+}
+
+// =============================================================================
+// RENDER
+// =============================================================================
+function fmt$(n)   { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function fmt$2(n)  { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtM(n)   { return '$' + (n / 1000000).toFixed(2) + 'M'; }
+function fmtK(n)   { return '$' + Math.round(n / 1000).toLocaleString() + 'K'; }
+function fmtPct(n, dp = 2) { return (n || 0).toFixed(dp) + '%'; }
+function fmtBps(n) { return (n >= 0 ? '+' : '') + (n * 100).toFixed(0) + ' bps'; }
+function fmtSigned$(n) {
+  const s = n >= 0 ? '+' : '−';
+  return s + fmt$(Math.abs(n));
+}
+
+function activeScenario() { return state.activeTab === 'current' ? 'current' : state.activeTab; }
+
+function renderGlobals() {
+  document.getElementById('revenue').value = state.globals.revenue;
+  document.getElementById('agmPct').value = state.globals.agmPct;
+  document.getElementById('agmDollars').value = Math.round(state.globals.revenue * state.globals.agmPct / 100);
+  document.getElementById('otherComp').value = state.globals.otherComp || 0;
+  document.getElementById('ceilingPct').value = state.globals.ceilingPct;
+  document.getElementById('distLow').value = state.globals.distLow;
+  document.getElementById('distMed').value = state.globals.distMed;
+  document.getElementById('distHigh').value = state.globals.distHigh;
+  document.getElementById('multLow').value = state.globals.multLow;
+  document.getElementById('multMed').value = state.globals.multMed;
+  document.getElementById('multHigh').value = state.globals.multHigh;
+
+  const sum = state.globals.distLow + state.globals.distMed + state.globals.distHigh;
+  const sumEl = document.getElementById('distSum');
+  sumEl.textContent = 'Total: ' + sum + '%';
+  sumEl.className = 'sum' + (Math.abs(sum - 100) > 0.01 ? ' warn' : '');
+}
+
+function renderTabs() {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
+  });
+  // Update tab badges with annual cost
+  SCENARIOS.forEach(s => {
+    const tot = calcScenarioTotals(s);
+    const el = document.getElementById('pct-' + s);
+    if (el) el.textContent = fmtM(tot.totalCost);
+  });
+  // Update aggregate badge
+  const label = document.getElementById('agg-label');
+  label.textContent = (state.activeTab === 'current' ? 'Current state (baseline)' : 'Scenario ' + state.activeTab + ' vs Current');
+}
+
+function renderMatrix() {
+  const tbody = document.getElementById('matrix-body');
+  tbody.innerHTML = '';
+  const sce = activeScenario();
+  const isLocked = sce === 'current';
+
+  let lastGroup = null;
+  POSITIONS.forEach(p => {
+    if (p.group !== lastGroup) {
+      lastGroup = p.group;
+      const groupRow = document.createElement('tr');
+      groupRow.className = 'group-divider';
+      const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
+      groupRow.innerHTML = `<th colspan="13">${label}</th>`;
+      tbody.appendChild(groupRow);
+    }
+
+    const r = calcPosition(p.id, sce);
+    const rL = calcRaisePct(p.id, sce, 'low');
+    const rM = calcRaisePct(p.id, sce, 'med');
+    const rH = calcRaisePct(p.id, sce, 'high');
+    const ps = state.positions[p.id];
+
+    const raiseCell = (val) => {
+      if (val === null) return '<td class="delta-zero">—</td>';
+      if (sce === 'current') return '<td class="delta-zero">—</td>';
+      const cls = val > 0.005 ? 'delta-pos' : val < -0.005 ? 'delta-neg' : 'delta-zero';
+      const sign = val > 0 ? '+' : '';
+      return `<td class="${cls}">${sign}${val.toFixed(2)}%</td>`;
+    };
+
+    const ro = isLocked ? 'readonly' : '';
+    const roCls = isLocked ? ' readonly' : '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}</td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/></td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/></td>
+      <td>${fmt$2(r.tccLow)}</td>
+      <td>${fmt$2(r.tccMed)}</td>
+      <td>${fmt$2(r.tccHigh)}</td>
+      ${raiseCell(rL)}
+      ${raiseCell(rM)}
+      ${raiseCell(rH)}
+      <td>${fmt$2(r.avgPerHr)}</td>
+      <td>${fmt$(r.annualCost)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Wire up inputs
+  tbody.querySelectorAll('.cell-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const pos = e.target.dataset.pos;
+      const field = e.target.dataset.field;
+      const val = parseFloat(e.target.value) || 0;
+      const sce2 = activeScenario();
+      if (field === 'headcount' || field === 'hrsPerYr') {
+        // Headcount and hrs are shared across scenarios
+        state.positions[pos][field] = val;
+      } else {
+        state.positions[pos][field][sce2] = val;
+      }
+      saveState();
+      renderAll();
+    });
+  });
+
+  // Footer totals
+  const tot = calcScenarioTotals(sce);
+  document.getElementById('foot-headcount').textContent = tot.totalHeadcount;
+  document.getElementById('foot-avg').textContent = fmt$2(tot.avgPerHr);
+  document.getElementById('foot-total').textContent = fmt$(tot.totalCost);
+}
+
+function renderAggregate() {
+  const sce = activeScenario();
+  const cur = calcScenarioTotals('current');
+  const cmp = calcScenarioTotals(sce);
+  const isCurrent = sce === 'current';
+
+  const deltaCost = cmp.totalCost - cur.totalCost;
+  const deltaPct = cur.totalCost > 0 ? (deltaCost / cur.totalCost) * 100 : 0;
+  const deltaRev = cmp.moverCompToRev - cur.moverCompToRev;
+  const deltaTotalAgm = cmp.totalCompToAgm - cur.totalCompToAgm;
+  const deltaAvg = cmp.avgPerHr - cur.avgPerHr;
+  const deltaAvgPct = cur.avgPerHr > 0 ? (deltaAvg / cur.avgPerHr) * 100 : 0;
+  const ceiling = state.globals.ceilingPct;
+  const hasOtherComp = (state.globals.otherComp || 0) > 0;
+
+  // Tone for ceiling: bad if over, good if comfortably under, warn if close
+  const ceilingTone = (v) => {
+    if (!hasOtherComp) return '';
+    if (v > ceiling) return 'bad';
+    if (v > ceiling - 1.5) return 'warn';
+    return 'good';
+  };
+
+  // Cards
+  const cards = document.getElementById('cards');
+  const tone = (v) => v > 0.005 ? 'warn' : v < -0.005 ? 'good' : '';
+  cards.innerHTML = `
+    <div class="stat">
+      <div class="label">Total Annual Mover Comp</div>
+      <div class="big">${fmtM(cmp.totalCost)}</div>
+      <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaCost) + ' / ' + (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(2) + '% vs current'}</div>
+    </div>
+    <div class="stat ${isCurrent ? '' : tone(deltaRev)}">
+      <div class="label">Mover Comp ÷ Revenue</div>
+      <div class="big">${fmtPct(cmp.moverCompToRev)}</div>
+      <div class="delta">${isCurrent ? 'baseline' : (deltaRev >= 0 ? '+' : '') + (deltaRev * 100).toFixed(0) + ' bps vs current'}</div>
+    </div>
+    <div class="stat ${ceilingTone(cmp.totalCompToAgm)}">
+      <div class="label">Total Comp ÷ AGM ${hasOtherComp ? '' : '(needs other comp)'}</div>
+      <div class="big">${hasOtherComp ? fmtPct(cmp.totalCompToAgm) : '—'}</div>
+      <div class="delta">${hasOtherComp ? 'Ceiling: ' + ceiling + '% · ' + (cmp.totalCompToAgm < ceiling ? 'under by ' + (ceiling - cmp.totalCompToAgm).toFixed(2) + 'pp' : 'OVER by ' + (cmp.totalCompToAgm - ceiling).toFixed(2) + 'pp') : 'Add "All Other Annual Comp" above to compute'}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Blended Mover $/hr</div>
+      <div class="big">${fmt$2(cmp.avgPerHr)}</div>
+      <div class="delta">${isCurrent ? 'baseline' : (deltaAvg >= 0 ? '+' : '−') + fmt$2(Math.abs(deltaAvg)) + ' / ' + (deltaAvgPct >= 0 ? '+' : '') + deltaAvgPct.toFixed(2) + '%'}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Base $ / Variable $ (movers)</div>
+      <div class="big" style="font-size:18px">${fmtK(cmp.totalBase)} + ${fmtK(cmp.totalVar)}</div>
+      <div class="delta">${(cmp.totalCost > 0 ? (cmp.totalVar / cmp.totalCost * 100).toFixed(1) : 0)}% of mover comp is variable</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mover Headcount</div>
+      <div class="big">${cmp.totalHeadcount}</div>
+      <div class="delta">${Math.round(cmp.totalHrs).toLocaleString()} hrs/yr · AGM ${fmtM(cmp.agmDollars)}</div>
+    </div>
+  `;
+
+  // Side-by-side
+  const sxs = document.getElementById('sxs').querySelector('tbody');
+  const hasOther = (state.globals.otherComp || 0) > 0;
+  const rows = [
+    { label: 'Total Annual Mover Comp', fn: t => fmtM(t.totalCost) },
+    { label: 'Δ vs Current ($)', fn: t => t === cur ? '—' : fmtSigned$(t.totalCost - cur.totalCost) },
+    { label: 'Δ vs Current (%)', fn: t => t === cur ? '—' : ((t.totalCost - cur.totalCost) / cur.totalCost * 100).toFixed(2) + '%' },
+    { label: 'Total Base $', fn: t => fmtM(t.totalBase) },
+    { label: 'Total Variable $', fn: t => fmtM(t.totalVar) },
+    { label: 'Variable % of Mover Comp', fn: t => (t.totalCost > 0 ? (t.totalVar / t.totalCost * 100).toFixed(1) : 0) + '%' },
+    { label: 'Blended Mover $/hr', fn: t => fmt$2(t.avgPerHr) },
+    { label: 'Mover Comp ÷ Revenue', fn: t => fmtPct(t.moverCompToRev) },
+    { label: 'Mover Comp ÷ AGM', fn: t => fmtPct(t.moverCompToAgm) },
+    { label: 'Total Comp ÷ AGM (vs ' + state.globals.ceilingPct + '% ceiling)', fn: t => hasOther ? fmtPct(t.totalCompToAgm) : '—' },
+  ];
+  const allTotals = {
+    current: cur,
+    A: calcScenarioTotals('A'),
+    B: calcScenarioTotals('B'),
+    C: calcScenarioTotals('C'),
+  };
+  sxs.innerHTML = rows.map(r => `
+    <tr>
+      <td class="left row-label">${r.label}</td>
+      <td>${r.fn(allTotals.current)}</td>
+      <td>${r.fn(allTotals.A)}</td>
+      <td>${r.fn(allTotals.B)}</td>
+      <td>${r.fn(allTotals.C)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderMoverView() {
+  // Position dropdown
+  const posSel = document.getElementById('mover-position');
+  if (posSel.options.length === 0) {
+    POSITIONS.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      posSel.appendChild(opt);
+    });
+  }
+  posSel.value = state.moverPosition;
+  document.getElementById('mover-scenario').value = state.moverScenario;
+  document.getElementById('mover-tips').value = state.moverTips;
+
+  const posId = state.moverPosition;
+  const sce = state.moverScenario;
+  const p = POSITIONS.find(x => x.id === posId);
+  const cur = calcPosition(posId, 'current');
+  const sceR = calcPosition(posId, sce);
+  const tips = state.moverTips.split(',').map(Number);
+  const tipsLow = tips[0], tipsHigh = tips[1];
+
+  const rL = calcRaisePct(posId, sce, 'low');
+  const rM = calcRaisePct(posId, sce, 'med');
+  const rH = calcRaisePct(posId, sce, 'high');
+
+  const raiseCls = v => v === null ? 'raise-zero' : v > 0.005 ? 'raise-pos' : v < -0.005 ? 'raise-neg' : 'raise-zero';
+  const raiseTxt = v => v === null ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+
+  const tipsRange = tipsHigh > 0
+    ? `<tr>
+         <td class="col-perf">Tips (typical)</td>
+         <td>+$${tipsLow.toFixed(2)} to +$${tipsHigh.toFixed(2)} / hr</td>
+         <td colspan="3" style="color:#6B6B6B">Tips are on top of base + variable</td>
+       </tr>
+       <tr>
+         <td class="col-perf">All-In Hourly Range (incl. tips)</td>
+         <td>$${(sceR.tccLow + tipsLow).toFixed(2)}–$${(sceR.tccLow + tipsHigh).toFixed(2)}</td>
+         <td>$${(sceR.tccMed + tipsLow).toFixed(2)}–$${(sceR.tccMed + tipsHigh).toFixed(2)}</td>
+         <td>$${(sceR.tccHigh + tipsLow).toFixed(2)}–$${(sceR.tccHigh + tipsHigh).toFixed(2)}</td>
+         <td></td>
+       </tr>` : '';
+
+  const annualBase = sceR.base * sceR.hrsPerYr;
+  const annualVarLow = sceR.varMax * (state.globals.multLow / 100) * sceR.hrsPerYr;
+  const annualVarMed = sceR.varMax * (state.globals.multMed / 100) * sceR.hrsPerYr;
+  const annualVarHigh = sceR.varMax * (state.globals.multHigh / 100) * sceR.hrsPerYr;
+
+  const html = `
+    <h3>${p.name} — Scenario ${sce}</h3>
+    <p class="lede">Your current pay is <strong>$${cur.base.toFixed(2)}/hr base + up to $${cur.varMax.toFixed(2)}/hr variable</strong>. Under the new plan, you'll get <strong>$${sceR.base.toFixed(2)}/hr base + up to $${sceR.varMax.toFixed(2)}/hr variable</strong>, paid out at low / medium / high performance levels.</p>
+    <table class="announce-grid">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Low Performance</th>
+          <th>Medium Performance</th>
+          <th>High Performance</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-perf">New Base $/hr</td>
+          <td colspan="3" style="text-align:center; font-weight:600">$${sceR.base.toFixed(2)}</td>
+          <td style="color:#6B6B6B">Same at every performance tier</td>
+        </tr>
+        <tr>
+          <td class="col-perf">Variable $/hr</td>
+          <td class="perf-low">+$${(sceR.varMax * state.globals.multLow / 100).toFixed(2)}</td>
+          <td class="perf-med">+$${(sceR.varMax * state.globals.multMed / 100).toFixed(2)}</td>
+          <td class="perf-high">+$${(sceR.varMax * state.globals.multHigh / 100).toFixed(2)}</td>
+          <td style="color:#6B6B6B">Quarterly bonus</td>
+        </tr>
+        <tr>
+          <td class="col-perf">Total Cash Comp / hr</td>
+          <td class="perf-low" style="font-weight:700">$${sceR.tccLow.toFixed(2)}</td>
+          <td class="perf-med" style="font-weight:700">$${sceR.tccMed.toFixed(2)}</td>
+          <td class="perf-high" style="font-weight:700">$${sceR.tccHigh.toFixed(2)}</td>
+          <td style="color:#6B6B6B">Base + variable</td>
+        </tr>
+        <tr>
+          <td class="col-perf">Raise vs Current</td>
+          <td class="${raiseCls(rL)}">${raiseTxt(rL)}</td>
+          <td class="${raiseCls(rM)}">${raiseTxt(rM)}</td>
+          <td class="${raiseCls(rH)}">${raiseTxt(rH)}</td>
+          <td style="color:#6B6B6B">Apples-to-apples at same perf tier</td>
+        </tr>
+        ${tipsRange}
+        <tr style="background:#F8F8F8">
+          <td class="col-perf">Annual TCC (at ${Math.round(sceR.hrsPerYr).toLocaleString()} hrs/yr)</td>
+          <td>${fmt$(annualBase + annualVarLow)}</td>
+          <td>${fmt$(annualBase + annualVarMed)}</td>
+          <td>${fmt$(annualBase + annualVarHigh)}</td>
+          <td style="color:#6B6B6B">Pre-tax, excludes tips</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="announce-note">
+      <strong>How variable is earned:</strong> Performance is scored each quarter. Low = ${state.globals.multLow}% of max variable, Medium = ${state.globals.multMed}%, High = ${state.globals.multHigh}%. Bonus is paid out one month after the quarter ends.<br/>
+      <strong>Same package, all-in hourly:</strong> at the typical tips range, a ${p.name} performing at medium would earn ${tipsHigh > 0 ? '$' + (sceR.tccMed + tipsLow).toFixed(2) + '–$' + (sceR.tccMed + tipsHigh).toFixed(2) : '$' + sceR.tccMed.toFixed(2)} / hr all-in.
+    </div>
+  `;
+
+  document.getElementById('announce').innerHTML = html;
+}
+
+function renderAll() {
+  renderGlobals();
+  renderTabs();
+  renderMatrix();
+  renderAggregate();
+  renderMoverView();
+}
+
+// =============================================================================
+// EVENT WIRING
+// =============================================================================
+
+// Globals inputs
+const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
+globalFields.forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', (e) => {
+    state.globals[id] = parseFloat(e.target.value) || 0;
+    saveState();
+    renderAll();
+  });
+});
+
+// Tabs
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab');
+  if (!btn) return;
+  state.activeTab = btn.dataset.tab;
+  saveState();
+  renderAll();
+});
+
+// Mover view dropdowns
+document.getElementById('mover-position').addEventListener('change', e => {
+  state.moverPosition = e.target.value;
+  saveState();
+  renderMoverView();
+});
+document.getElementById('mover-scenario').addEventListener('change', e => {
+  state.moverScenario = e.target.value;
+  saveState();
+  renderMoverView();
+});
+document.getElementById('mover-tips').addEventListener('change', e => {
+  state.moverTips = e.target.value;
+  saveState();
+  renderMoverView();
+});
+
+// Export CSV
+document.getElementById('export-csv').addEventListener('click', () => {
+  const lines = [];
+  // Header
+  lines.push(['Position','Group','Headcount','Hrs/yr','Scenario','Base $/hr','Var Max $/hr','TCC Low','TCC Med','TCC High','Avg $/hr','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H'].join(','));
+  POSITIONS.forEach(p => {
+    SCENARIOS.forEach(s => {
+      const r = calcPosition(p.id, s);
+      const rL = calcRaisePct(p.id, s, 'low');
+      const rM = calcRaisePct(p.id, s, 'med');
+      const rH = calcRaisePct(p.id, s, 'high');
+      lines.push([
+        p.name, p.group, r.headcount, r.hrsPerYr, s,
+        r.base.toFixed(2), r.varMax.toFixed(2),
+        r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
+        r.avgPerHr.toFixed(2),
+        Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost),
+        s === 'current' ? '' : (rL || 0).toFixed(2),
+        s === 'current' ? '' : (rM || 0).toFixed(2),
+        s === 'current' ? '' : (rH || 0).toFixed(2),
+      ].join(','));
+    });
+  });
+  // Totals block
+  lines.push('');
+  lines.push(['','','','','','','','','','','','','','','','',''].join(','));
+  lines.push(['Aggregate','Scenario','Total Mover Comp','Δ vs Current','Δ %','Mover Comp/Rev','Mover Comp/AGM','Total Comp/AGM','Avg $/hr','Variable %','','','','','','',''].join(','));
+  const cur = calcScenarioTotals('current');
+  SCENARIOS.forEach(s => {
+    const t = calcScenarioTotals(s);
+    lines.push([
+      '', s,
+      Math.round(t.totalCost),
+      Math.round(t.totalCost - cur.totalCost),
+      cur.totalCost > 0 ? ((t.totalCost - cur.totalCost) / cur.totalCost * 100).toFixed(2) + '%' : '',
+      t.moverCompToRev.toFixed(2) + '%',
+      t.moverCompToAgm.toFixed(2) + '%',
+      t.totalCompToAgm.toFixed(2) + '%',
+      t.avgPerHr.toFixed(2),
+      t.totalCost > 0 ? (t.totalVar / t.totalCost * 100).toFixed(1) + '%' : '',
+      '','','','','','',''
+    ].join(','));
+  });
+  // Globals
+  lines.push('');
+  lines.push('Global Inputs,,,,,,,,,,,,,,,,');
+  lines.push('Revenue,' + state.globals.revenue + ',,,,,,,,,,,,,,,');
+  lines.push('AGM %,' + state.globals.agmPct + ',,,,,,,,,,,,,,,');
+  lines.push('AGM $,' + Math.round(state.globals.revenue * state.globals.agmPct / 100) + ',,,,,,,,,,,,,,,');
+  lines.push('All Other Annual Comp $,' + (state.globals.otherComp || 0) + ',,,,,,,,,,,,,,,');
+  lines.push('Comp-to-AGM Ceiling %,' + state.globals.ceilingPct + ',,,,,,,,,,,,,,,');
+  lines.push('Dist L/M/H %,' + state.globals.distLow + '/' + state.globals.distMed + '/' + state.globals.distHigh + ',,,,,,,,,,,,,,,');
+  lines.push('Mult L/M/H %,' + state.globals.multLow + '/' + state.globals.multMed + '/' + state.globals.multHigh + ',,,,,,,,,,,,,,,');
+
+  const csv = lines.join('\n');
+  const date = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mover-comp-scenarios-' + date + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Copy / Paste state
+document.getElementById('copy-state').addEventListener('click', () => {
+  const json = JSON.stringify(state, null, 2);
+  navigator.clipboard.writeText(json).then(() => {
+    showToast('Scenario JSON copied — paste to Paul/Ben');
+  });
+});
+
+document.getElementById('paste-state').addEventListener('click', () => {
+  const json = prompt('Paste scenario JSON:');
+  if (!json) return;
+  try {
+    const parsed = JSON.parse(json);
+    if (!parsed.globals || !parsed.positions) throw new Error('Missing required fields');
+    state = parsed;
+    saveState();
+    renderAll();
+    showToast('Scenario loaded from JSON');
+  } catch (e) {
+    alert('Invalid JSON: ' + e.message);
+  }
+});
+
+// Share link — encode state into URL hash and copy to clipboard
+document.getElementById('copy-share-link').addEventListener('click', () => {
+  const url = buildShareUrl();
+  // Also update the address bar so the user can see / re-copy from there
+  history.replaceState(null, '', '#s=' + encodeStateToUrl(state));
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('🔗 Share link copied — paste in Slack to send Paul or Ben', 3000);
+  }).catch(() => {
+    // Fallback if clipboard API blocked
+    prompt('Copy this share link:', url);
+  });
+});
+
+// Dismiss the "loaded from share" banner
+document.getElementById('share-banner-dismiss').addEventListener('click', () => {
+  document.getElementById('share-banner').style.display = 'none';
+  // Strip the hash from the URL so refreshing doesn't reload the shared state
+  history.replaceState(null, '', window.location.pathname);
+});
+
+document.getElementById('reset-all').addEventListener('click', () => {
+  if (!confirm('Reset all scenarios to defaults? This will wipe A, B, and C.')) return;
+  state = defaultState();
+  saveState();
+  // Also clear the URL hash so a stale shared link doesn't reload
+  history.replaceState(null, '', window.location.pathname);
+  renderAll();
+  showToast('All scenarios reset to defaults');
+});
+
+// =============================================================================
+// INIT
+// =============================================================================
+if (loadedFromShare) {
+  document.getElementById('share-banner').style.display = 'block';
+  // Auto-hide after 12s — but stays until then so user can read it
+  setTimeout(() => {
+    const banner = document.getElementById('share-banner');
+    if (banner) banner.style.display = 'none';
+  }, 12000);
+  // Save the shared state into localStorage so it persists
+  saveState();
+}
+renderAll();
+</script>
+</body>
+</html>
