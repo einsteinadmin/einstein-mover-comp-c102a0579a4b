@@ -1382,6 +1382,14 @@ function migrateState(s) {
       s.positions[posId].diffHc = Math.round(hc * pct);
     }
   });
+  // v2.7: any position present in POSITIONS but missing from saved state
+  // (e.g. 'waiting' added in v2.7) gets seeded from defaults so calcPosition
+  // doesn't crash when iterating across all known positions.
+  POSITIONS.forEach(p => {
+    if (!s.positions[p.id] && def.positions[p.id]) {
+      s.positions[p.id] = JSON.parse(JSON.stringify(def.positions[p.id]));
+    }
+  });
   // hiddenCols introduced in v2.4 (replaces hideRaiseM)
   if (!s.hiddenCols) {
     s.hiddenCols = Object.assign({}, def.hiddenCols);
