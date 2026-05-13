@@ -1390,6 +1390,16 @@ function migrateState(s) {
       s.positions[p.id] = JSON.parse(JSON.stringify(def.positions[p.id]));
     }
   });
+  // v2.7.1: any top-level UI-state field missing on the loaded state gets
+  // filled from defaults. Prevents crashes when older/partial state loads
+  // without moverPosition, hiddenCols, etc.
+  ['activeTab','moverPosition','moverScenario','moverBranch','moverTips','hiddenCols'].forEach(k => {
+    if (s[k] === undefined) s[k] = def[k];
+  });
+  // And: if moverPosition points to a position id we no longer have, reset it.
+  if (!POSITIONS.find(p => p.id === s.moverPosition)) {
+    s.moverPosition = def.moverPosition;
+  }
   // hiddenCols introduced in v2.4 (replaces hideRaiseM)
   if (!s.hiddenCols) {
     s.hiddenCols = Object.assign({}, def.hiddenCols);
