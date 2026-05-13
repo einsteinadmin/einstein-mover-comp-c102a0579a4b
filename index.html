@@ -599,6 +599,65 @@
   .tip .tip-body strong { color: #FFD9A8; }
   .tip-flag { color: #FFD180; font-weight: 700; }
 
+  /* Saved versions */
+  .saves-section { margin-top: 16px; }
+  .saves-empty {
+    color: var(--muted);
+    font-size: 12.5px;
+    font-style: italic;
+    padding: 12px 0;
+  }
+  table.saves {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  table.saves th, table.saves td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.saves th {
+    background: #F4F4F4;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  table.saves td.name {
+    font-weight: 600;
+    color: var(--ink);
+    word-break: break-word;
+  }
+  table.saves td.meta {
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  table.saves td.actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .saves-btn {
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-left: 4px;
+    font-weight: 500;
+  }
+  .saves-btn:hover { background: var(--bg); color: var(--ink); }
+  .saves-btn.primary { background: var(--orange); color: white; border-color: var(--orange); }
+  .saves-btn.primary:hover { background: var(--orange-dark); border-color: var(--orange-dark); }
+  .saves-btn.danger { color: var(--red); border-color: var(--red); }
+  .saves-btn.danger:hover { background: #FBEAE9; }
+
   /* Help modal */
   .modal-backdrop {
     display: none;
@@ -1025,6 +1084,17 @@
       <strong>State also persists in your browser</strong> via localStorage — close the tab and your scenarios come back next time.
       JSON copy/paste is the fallback if a link feels too long.
     </p>
+
+    <div class="saves-section">
+      <h2 style="margin-top:18px;">💾 Saved Versions <span class="badge">named snapshots</span></h2>
+      <p class="sub">Save the current state of all globals + scenarios under a name. Reload later to restore exactly. Lives in your browser; not synced across machines (use the Copy share link button on a saved version to send it).</p>
+      <div class="btn-row">
+        <button class="btn" id="save-current">💾 Save current state…</button>
+        <button class="btn secondary" id="saves-export">Export all saves (JSON)</button>
+        <button class="btn secondary" id="saves-import">Import saves (JSON)</button>
+      </div>
+      <div id="saves-list-wrap"></div>
+    </div>
   </section>
 
 </main>
@@ -1120,7 +1190,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.1).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.2).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1221,6 +1291,7 @@
         <li><strong>Inline baseline values</strong> — small "vs $X.XX" under each editable input on A/B/C tabs only</li>
         <li><strong>Sticky Position column</strong> — first column pins on horizontal scroll</li>
         <li><strong>"📎 Copy share link"</strong> — encodes full state to URL, copies to clipboard. Recipient sees exactly your view</li>
+        <li><strong>💾 Saved Versions</strong> — name + snapshot the full state for later reload (Save / Load / Rename / Delete / per-version Share). Stored in localStorage under <code>einstein-mover-comp-saves-v1</code>. Export-all-as-JSON for cross-machine backup.</li>
         <li><strong>Mover-view branch toggle</strong> — Standard vs Houston/SAA; re-computes announcement</li>
         <li><strong>CSV export</strong> — always includes every column regardless of which are hidden</li>
       </ul>
@@ -1278,6 +1349,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.2 (5/13)</strong> — Added <strong>Saved Versions</strong> system. Snapshot the full state (globals + all scenarios + UI) under a name; reload later to restore exactly. Per-save share-link button generates a URL pointing at the saved state. Export-all-as-JSON / Import-from-JSON for cross-machine portability. Stored in localStorage at <code>einstein-mover-comp-saves-v1</code>, separate from the live working state.</li>
         <li><strong>v3.1 (5/13)</strong> — Burden default tuned from 20% → <strong>13%</strong> per Cameron's estimate (payroll taxes + workers comp + retirement match + health insurance). The Mover Comp ÷ Revenue ceiling now applies to the LOADED figure (wages × 1.13), making the 40% ceiling a true affordability gate. New "Mover Wages ÷ Revenue (unloaded)" reference card sits alongside for industry-benchmark comparison. Removed redundant "True Mover Cost ÷ Revenue" placeholder from Combined module (now covered by the loaded card in Mover Affordability).</li>
         <li><strong>v3.0 (5/13)</strong> — Added <strong>Benefits & burden %</strong> global multiplier capturing employer-side costs above wages. New "True Annual Cost" column at end of position matrix. New "True Total Mover Cost" card in Mover Affordability module. "Essentials only" preset locked to Cameron's spec: Headcount · Base · Var Max · TCC High · Raise % H · Δ/hr max · Annual Cost.</li>
         <li><strong>v2.9 (5/13)</strong> — Added "Δ $/hr (low)" and "Δ $/hr (med)" columns alongside the existing (max). Three-tier dollar-delta view of any scenario vs Current. Default visible; "Essentials only" preset hides low + med (keeps max). All three in CSV export. Group-divider colspan now 18.</li>
@@ -2338,6 +2410,165 @@ document.getElementById('copy-share-link').addEventListener('click', () => {
   });
 });
 
+// ---- Saved versions (named snapshots) ----
+const SAVES_KEY = 'einstein-mover-comp-saves-v1';
+function loadSaves() {
+  try {
+    const raw = localStorage.getItem(SAVES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+function writeSaves(obj) {
+  try { localStorage.setItem(SAVES_KEY, JSON.stringify(obj)); } catch (e) {}
+}
+function fmtSavedAt(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  } catch (e) { return iso; }
+}
+function renderSavesList() {
+  const wrap = document.getElementById('saves-list-wrap');
+  const saves = loadSaves();
+  const names = Object.keys(saves).sort((a, b) => (saves[b].savedAt || '').localeCompare(saves[a].savedAt || ''));
+  if (names.length === 0) {
+    wrap.innerHTML = '<div class="saves-empty">No saved versions yet. Hit "Save current state…" to snapshot the current globals + scenarios under a name.</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="saves">
+      <thead>
+        <tr><th>Name</th><th>Saved</th><th>Scenario A total</th><th style="text-align:right;">Actions</th></tr>
+      </thead>
+      <tbody>
+        ${names.map(n => {
+          const s = saves[n];
+          // Quick stat: total cost of Scenario A in that save (gives at-a-glance differentiation)
+          let aCost = '—';
+          try {
+            const positions = s.state.positions || {};
+            const g = s.state.globals || {};
+            let total = 0;
+            Object.keys(positions).forEach(pid => {
+              const p = positions[pid];
+              const base = (p.base && p.base.A) || 0;
+              const varMax = (p.varMax && p.varMax.A) || 0;
+              const hrs = p.hrsPerYr || 0;
+              const hc = p.headcount || 0;
+              const dHc = p.diffHc || 0;
+              const stdHc = hc - dHc;
+              const expVar = varMax * ((g.distLow||0)/100*(g.multLow||0)/100 + (g.distMed||0)/100*(g.multMed||0)/100 + (g.distHigh||0)/100*(g.multHigh||0)/100);
+              total += stdHc * hrs * base + dHc * hrs * (base + (g.branchDiff||0)) + hc * hrs * expVar;
+            });
+            aCost = '$' + (total / 1000000).toFixed(2) + 'M';
+          } catch (e) {}
+          const safeName = n.replace(/"/g, '&quot;');
+          return `
+            <tr data-save="${safeName}">
+              <td class="name">${n.replace(/</g, '&lt;')}</td>
+              <td class="meta">${fmtSavedAt(s.savedAt)}</td>
+              <td class="meta">${aCost}</td>
+              <td class="actions">
+                <button class="saves-btn primary" data-act="load">Load</button>
+                <button class="saves-btn" data-act="share">📎 Share</button>
+                <button class="saves-btn" data-act="rename">Rename</button>
+                <button class="saves-btn danger" data-act="delete">Delete</button>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+  // Wire up actions
+  wrap.querySelectorAll('button[data-act]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr');
+      const name = tr.dataset.save;
+      const act = e.target.dataset.act;
+      const saves = loadSaves();
+      if (act === 'load') {
+        if (!confirm(`Load "${name}"? This replaces the current state. Your in-browser working state will be overwritten.`)) return;
+        state = migrateState(JSON.parse(JSON.stringify(saves[name].state))) || defaultState();
+        saveState();
+        renderAll();
+        showToast(`Loaded "${name}"`);
+      } else if (act === 'rename') {
+        const newName = prompt('Rename saved version:', name);
+        if (!newName || newName === name) return;
+        if (saves[newName] && !confirm(`Overwrite existing "${newName}"?`)) return;
+        saves[newName] = saves[name];
+        if (newName !== name) delete saves[name];
+        writeSaves(saves);
+        renderSavesList();
+      } else if (act === 'delete') {
+        if (!confirm(`Delete saved version "${name}"? Cannot be undone.`)) return;
+        delete saves[name];
+        writeSaves(saves);
+        renderSavesList();
+        showToast(`Deleted "${name}"`);
+      } else if (act === 'share') {
+        // Build a share URL from this saved state (not the current state)
+        const encoded = encodeStateToUrl(saves[name].state);
+        const url = window.location.origin + window.location.pathname + '#s=' + encoded;
+        navigator.clipboard.writeText(url).then(() => {
+          showToast(`📎 Share link for "${name}" copied`, 2800);
+        }).catch(() => { prompt('Copy this share link:', url); });
+      }
+    });
+  });
+}
+
+document.getElementById('save-current').addEventListener('click', () => {
+  const suggested = 'v' + (Object.keys(loadSaves()).length + 1) + ' — ' + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const name = prompt('Name this saved version:', suggested);
+  if (!name) return;
+  const saves = loadSaves();
+  if (saves[name] && !confirm(`Overwrite existing "${name}"?`)) return;
+  saves[name] = {
+    state: JSON.parse(JSON.stringify(state)),
+    savedAt: new Date().toISOString(),
+  };
+  writeSaves(saves);
+  renderSavesList();
+  showToast(`💾 Saved as "${name}"`);
+});
+
+document.getElementById('saves-export').addEventListener('click', () => {
+  const saves = loadSaves();
+  if (Object.keys(saves).length === 0) { showToast('No saved versions to export'); return; }
+  const json = JSON.stringify(saves, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mover-comp-saves-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('saves-import').addEventListener('click', () => {
+  const json = prompt('Paste saves JSON (from "Export all saves"):');
+  if (!json) return;
+  try {
+    const parsed = JSON.parse(json);
+    if (typeof parsed !== 'object') throw new Error('Expected an object');
+    const saves = loadSaves();
+    let merged = 0;
+    Object.keys(parsed).forEach(name => {
+      if (parsed[name] && parsed[name].state) {
+        saves[name] = parsed[name];
+        merged++;
+      }
+    });
+    writeSaves(saves);
+    renderSavesList();
+    showToast(`Imported ${merged} saved version${merged === 1 ? '' : 's'}`);
+  } catch (e) {
+    alert('Invalid saves JSON: ' + e.message);
+  }
+});
+
 // Dismiss the "loaded from share" banner
 document.getElementById('share-banner-dismiss').addEventListener('click', () => {
   document.getElementById('share-banner').style.display = 'none';
@@ -2387,6 +2618,7 @@ if (loadedFromShare) {
   saveState();
 }
 renderAll();
+renderSavesList();
 </script>
 </body>
 </html>
