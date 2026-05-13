@@ -223,17 +223,92 @@
     letter-spacing: 0;
     text-transform: none;
   }
-  table.matrix.hide-raise-m .col-raise-m { display: none; }
-  .col-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  /* Column-hide classes — one per hideable column */
+  table.matrix.hide-col-headcount .col-headcount,
+  table.matrix.hide-col-diffHc    .col-diffHc,
+  table.matrix.hide-col-hrsPerYr  .col-hrsPerYr,
+  table.matrix.hide-col-tccLow    .col-tccLow,
+  table.matrix.hide-col-tccMed    .col-tccMed,
+  table.matrix.hide-col-tccHigh   .col-tccHigh,
+  table.matrix.hide-col-varPct    .col-varPct,
+  table.matrix.hide-col-raiseL    .col-raiseL,
+  table.matrix.hide-col-raiseM    .col-raiseM,
+  table.matrix.hide-col-raiseH    .col-raiseH,
+  table.matrix.hide-col-avgPerHr  .col-avgPerHr { display: none; }
+
+  /* Columns picker (popover) */
+  .col-picker { position: relative; display: inline-block; }
+  .btn-cols {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 5px 10px;
     font-size: 12px;
-    color: var(--ink-soft);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-cols:hover { background: var(--bg); }
+  .btn-cols.active {
+    background: var(--orange-soft);
+    border-color: var(--orange);
+    color: var(--orange-dark);
+  }
+  .col-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: white;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.14);
+    padding: 12px 14px;
+    z-index: 100;
+    min-width: 220px;
+  }
+  .col-popover[hidden] { display: none; }
+  .col-popover-title {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .col-popover-group {
+    border-top: 1px solid var(--line);
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+  .col-popover-group:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+  .col-popover label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink);
+    padding: 3px 0;
     cursor: pointer;
     user-select: none;
   }
-  .col-toggle input { margin: 0; cursor: pointer; }
+  .col-popover label:hover { color: var(--orange-dark); }
+  .col-popover input[type="checkbox"] { margin: 0; cursor: pointer; }
+  .col-popover .actions {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+    font-size: 11.5px;
+  }
+  .col-popover .actions a {
+    color: var(--orange-dark);
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .col-popover .actions a:hover { text-decoration: underline; }
   table.matrix .pos-name {
     font-weight: 600;
     color: var(--ink);
@@ -713,19 +788,19 @@
         <thead>
           <tr>
             <th class="left">Position</th>
-            <th>Headcount</th>
-            <th>Diff HC</th>
-            <th>Hrs/yr</th>
+            <th class="col-headcount">Headcount</th>
+            <th class="col-diffHc">Diff HC</th>
+            <th class="col-hrsPerYr">Hrs/yr</th>
             <th>Base $/hr</th>
             <th>Var Max $/hr</th>
-            <th>TCC Low</th>
-            <th>TCC Med</th>
-            <th>TCC High</th>
-            <th>Var % (max)</th>
-            <th>Raise % L</th>
-            <th class="col-raise-m">Raise % M</th>
-            <th>Raise % H</th>
-            <th>Avg $/hr</th>
+            <th class="col-tccLow">TCC Low</th>
+            <th class="col-tccMed">TCC Med</th>
+            <th class="col-tccHigh">TCC High</th>
+            <th class="col-varPct">Var % (max)</th>
+            <th class="col-raiseL">Raise % L</th>
+            <th class="col-raiseM">Raise % M</th>
+            <th class="col-raiseH">Raise % H</th>
+            <th class="col-avgPerHr">Avg $/hr</th>
             <th>Annual Cost</th>
           </tr>
         </thead>
@@ -733,10 +808,18 @@
         <tfoot>
           <tr>
             <td class="left"><strong>Totals</strong></td>
-            <td id="foot-headcount" style="text-align:right"></td>
-            <td id="foot-diff-hc" style="text-align:right"></td>
-            <td colspan="10"></td>
-            <td id="foot-avg"></td>
+            <td id="foot-headcount" class="col-headcount" style="text-align:right"></td>
+            <td id="foot-diff-hc" class="col-diffHc" style="text-align:right"></td>
+            <td class="col-hrsPerYr"></td>
+            <td colspan="2"></td>
+            <td class="col-tccLow"></td>
+            <td class="col-tccMed"></td>
+            <td class="col-tccHigh"></td>
+            <td class="col-varPct"></td>
+            <td class="col-raiseL"></td>
+            <td class="col-raiseM"></td>
+            <td class="col-raiseH"></td>
+            <td id="foot-avg" class="col-avgPerHr"></td>
             <td id="foot-total"></td>
           </tr>
         </tfoot>
@@ -746,7 +829,34 @@
       <span><span class="sw" style="background:#EAF6EE;border:1px solid #B7D9C2"></span> raise %</span>
       <span><span class="sw" style="background:#FBEAE9;border:1px solid #EBB8B4"></span> cut %</span>
       <span>"Raise %" = vs current Total Cash Comp at same performance level (apples-to-apples).</span>
-      <label class="col-toggle"><input type="checkbox" id="toggle-raise-m" /> Hide Raise % M column</label>
+      <div class="col-picker">
+        <button class="btn-cols" id="cols-btn" type="button">📊 Columns <span id="cols-hidden-count" style="font-weight:400;opacity:0.7;"></span> ▾</button>
+        <div class="col-popover" id="cols-popover" hidden>
+          <div class="col-popover-title">Show / Hide Columns</div>
+          <div class="col-popover-group">
+            <label><input type="checkbox" data-col="headcount" /> Headcount</label>
+            <label><input type="checkbox" data-col="diffHc" /> Diff HC</label>
+            <label><input type="checkbox" data-col="hrsPerYr" /> Hrs/yr</label>
+          </div>
+          <div class="col-popover-group">
+            <label><input type="checkbox" data-col="tccLow" /> TCC Low</label>
+            <label><input type="checkbox" data-col="tccMed" /> TCC Med</label>
+            <label><input type="checkbox" data-col="tccHigh" /> TCC High</label>
+            <label><input type="checkbox" data-col="varPct" /> Var % (max)</label>
+          </div>
+          <div class="col-popover-group">
+            <label><input type="checkbox" data-col="raiseL" /> Raise % L</label>
+            <label><input type="checkbox" data-col="raiseM" /> Raise % M</label>
+            <label><input type="checkbox" data-col="raiseH" /> Raise % H</label>
+            <label><input type="checkbox" data-col="avgPerHr" /> Avg $/hr</label>
+          </div>
+          <div class="actions">
+            <a id="cols-show-all">Show all</a>
+            <span style="color:var(--muted);">·</span>
+            <a id="cols-essentials">Essentials only</a>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -977,9 +1087,14 @@ function defaultState() {
     moverScenario: 'A',
     moverTips: '5,8',
     moverBranch: 'std',
-    hideRaiseM: false,
+    hiddenCols: {
+      headcount: false, diffHc: false, hrsPerYr: false,
+      tccLow: false, tccMed: false, tccHigh: false, varPct: false,
+      raiseL: false, raiseM: false, raiseH: false, avgPerHr: false,
+    },
   };
 }
+const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','avgPerHr'];
 
 // Forward-compat shim — fill in fields added after a state was saved/shared
 function migrateState(s) {
@@ -997,6 +1112,12 @@ function migrateState(s) {
       s.positions[posId].diffHc = Math.round(hc * pct);
     }
   });
+  // hiddenCols introduced in v2.4 (replaces hideRaiseM)
+  if (!s.hiddenCols) {
+    s.hiddenCols = Object.assign({}, def.hiddenCols);
+    if (s.hideRaiseM) s.hiddenCols.raiseM = true;
+    delete s.hideRaiseM;
+  }
   return s;
 }
 
@@ -1201,11 +1322,20 @@ function renderMatrix() {
   const sce = activeScenario();
   const isLocked = sce === 'current';
 
-  // Apply hide-raise-m toggle to the table + sync checkbox
+  // Apply hidden-column classes + sync checkboxes + update counter
   const tableEl = document.getElementById('matrix');
-  tableEl.classList.toggle('hide-raise-m', !!state.hideRaiseM);
-  const tg = document.getElementById('toggle-raise-m');
-  if (tg) tg.checked = !!state.hideRaiseM;
+  let hiddenCount = 0;
+  HIDEABLE_COLS.forEach(col => {
+    const hidden = !!(state.hiddenCols && state.hiddenCols[col]);
+    tableEl.classList.toggle('hide-col-' + col, hidden);
+    const cb = document.querySelector('#cols-popover input[data-col="' + col + '"]');
+    if (cb) cb.checked = hidden;
+    if (hidden) hiddenCount++;
+  });
+  const cntEl = document.getElementById('cols-hidden-count');
+  if (cntEl) cntEl.textContent = hiddenCount > 0 ? '(' + hiddenCount + ' hidden)' : '';
+  const btn = document.getElementById('cols-btn');
+  if (btn) btn.classList.toggle('active', hiddenCount > 0);
 
   let lastGroup = null;
   POSITIONS.forEach(p => {
@@ -1243,19 +1373,19 @@ function renderMatrix() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}</td>
-      <td><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
-      <td><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
-      <td><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
+      <td class="col-headcount"><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
+      <td class="col-diffHc"><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
+      <td class="col-hrsPerYr"><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/>${baseBaseline}</td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/>${varBaseline}</td>
-      <td>${fmt$2(r.tccLow)}</td>
-      <td>${fmt$2(r.tccMed)}</td>
-      <td>${fmt$2(r.tccHigh)}</td>
-      <td>${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}</td>
-      ${raiseCell(rL)}
-      ${raiseCell(rM, 'col-raise-m')}
-      ${raiseCell(rH)}
-      <td>${fmt$2(r.avgPerHr)}</td>
+      <td class="col-tccLow">${fmt$2(r.tccLow)}</td>
+      <td class="col-tccMed">${fmt$2(r.tccMed)}</td>
+      <td class="col-tccHigh">${fmt$2(r.tccHigh)}</td>
+      <td class="col-varPct">${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}</td>
+      ${raiseCell(rL, 'col-raiseL')}
+      ${raiseCell(rM, 'col-raiseM')}
+      ${raiseCell(rH, 'col-raiseH')}
+      <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}</td>
       <td>${fmt$(r.annualCost)}</td>
     `;
     tbody.appendChild(tr);
@@ -1566,12 +1696,62 @@ document.getElementById('apply-bulk-diff').addEventListener('click', () => {
   showToast('Diff HC seeded at ' + state.globals.bulkDiffPct + '% across all positions');
 });
 
-// Hide Raise % M toggle
-document.getElementById('toggle-raise-m').addEventListener('change', (e) => {
-  state.hideRaiseM = e.target.checked;
-  saveState();
-  document.getElementById('matrix').classList.toggle('hide-raise-m', state.hideRaiseM);
-});
+// Columns picker popover — open / close + per-column toggle + presets
+(function () {
+  const btn = document.getElementById('cols-btn');
+  const pop = document.getElementById('cols-popover');
+  if (!btn || !pop) return;
+
+  function isOpen() { return !pop.hasAttribute('hidden'); }
+  function open()   { pop.removeAttribute('hidden'); }
+  function close()  { pop.setAttribute('hidden', ''); }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isOpen()) close(); else open();
+  });
+  // Click outside closes
+  document.addEventListener('click', (e) => {
+    if (!isOpen()) return;
+    if (pop.contains(e.target) || btn.contains(e.target)) return;
+    close();
+  });
+  // Esc closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) close();
+  });
+
+  // Per-column checkbox change
+  pop.querySelectorAll('input[type="checkbox"][data-col]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const col = e.target.dataset.col;
+      if (!state.hiddenCols) state.hiddenCols = {};
+      state.hiddenCols[col] = e.target.checked;
+      saveState();
+      // Just toggle the class — no need for full rerender
+      document.getElementById('matrix').classList.toggle('hide-col-' + col, e.target.checked);
+      // Update header counter
+      const hiddenCount = HIDEABLE_COLS.filter(c => state.hiddenCols[c]).length;
+      document.getElementById('cols-hidden-count').textContent = hiddenCount > 0 ? '(' + hiddenCount + ' hidden)' : '';
+      document.getElementById('cols-btn').classList.toggle('active', hiddenCount > 0);
+    });
+  });
+
+  // Show all
+  document.getElementById('cols-show-all').addEventListener('click', () => {
+    HIDEABLE_COLS.forEach(col => { state.hiddenCols[col] = false; });
+    saveState();
+    renderMatrix();
+  });
+  // Essentials preset: hide Headcount, Diff HC, Hrs/yr, TCC Low, TCC High, Var %, Raise % L, Raise % H, Avg $/hr
+  // — shows just Base / Var Max / TCC Med / Raise % M / Annual Cost
+  document.getElementById('cols-essentials').addEventListener('click', () => {
+    const hidden = ['headcount','diffHc','hrsPerYr','tccLow','tccHigh','varPct','raiseL','raiseH','avgPerHr'];
+    HIDEABLE_COLS.forEach(col => { state.hiddenCols[col] = hidden.includes(col); });
+    saveState();
+    renderMatrix();
+  });
+})();
 
 // Tabs
 document.getElementById('tabs').addEventListener('click', (e) => {
