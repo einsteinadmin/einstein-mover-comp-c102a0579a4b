@@ -497,6 +497,15 @@
         <span class="hint">Managers + ops + leadership comp. Lets total-comp ÷ AGM be meaningful.</span>
       </div>
       <div class="input-block">
+        <label>FTE basis (hrs/yr per FTE) <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>Used for the "Implied FTEs" card only.</strong> Default 2,080 = 40 hrs × 52 wks.<br/><br/>
+          Total mover-hours ÷ this number = how many full-time-equivalents that workload represents. If implied FTEs is meaningfully smaller than raw headcount, you've got a heavy part-time mix.<br/><br/>
+          Does NOT affect annual cost math — annual cost is driven by per-position <em>Hrs/yr</em>, which should already be a blended FT+PT average.
+        </span></span></label>
+        <input type="number" id="fteBasis" value="2080" step="40" />
+        <span class="hint">2,080 = 40 hrs × 52 wks (industry default)</span>
+      </div>
+      <div class="input-block">
         <label>Comp-to-AGM Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
           <strong>Read this before relying on the ceiling card.</strong><br/>
           The philosophy doc states: <em>"if comp-to-AGM climbs above ~16%, we reassess."</em> But it doesn't fully specify which comp cohort. Three possible reads:<br/><br/>
@@ -507,6 +516,27 @@
         </span></span></label>
         <input type="number" id="ceilingPct" value="16" step="0.5" />
         <span class="hint">Per philosophy doc — definition of "comp" needs Ben's confirmation. Hover the ? above.</span>
+      </div>
+    </div>
+
+    <div class="group-title">Branch Differential (Houston + San Antonio)</div>
+    <div class="grid">
+      <div class="input-block">
+        <label>Base $/hr differential <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>Houston + San Antonio base pay sits $1/hr below the other 8 branches</strong> across every position. Variable component is identical company-wide.<br/><br/>
+          The differential applies only to <em>base</em> pay. A negative number means the differential branches are <em>cheaper</em>. Set to 0 to model a unified pay band.
+        </span></span></label>
+        <input type="number" id="branchDiff" value="-1.00" step="0.25" />
+        <span class="hint">Default −$1.00 (Houston + SAA). Applied to base only.</span>
+      </div>
+      <div class="input-block">
+        <label>Bulk: Diff HC as % of each position</label>
+        <input type="number" id="bulkDiffPct" value="20" step="5" min="0" max="100" />
+        <span class="hint">Hit Apply to seed all rows. Per-row override below.</span>
+      </div>
+      <div class="input-block" style="justify-content:flex-end;">
+        <label>&nbsp;</label>
+        <button class="btn secondary" id="apply-bulk-diff" style="padding:6px 12px;font-size:12.5px;">Apply % to all positions</button>
       </div>
     </div>
 
@@ -563,6 +593,7 @@
           <tr>
             <th class="left">Position</th>
             <th>Headcount</th>
+            <th>Diff HC <span class="tip" tabindex="0" style="vertical-align:middle;">?<span class="tip-body"><strong>Houston + SAA headcount at this position.</strong> These movers earn base − differential. Variable is the same as standard branches.</span></span></th>
             <th>Hrs/yr</th>
             <th>Base $/hr</th>
             <th>Var Max $/hr</th>
@@ -579,9 +610,10 @@
         <tbody id="matrix-body"></tbody>
         <tfoot>
           <tr>
-            <td class="left" colspan="2"><strong>Totals</strong></td>
+            <td class="left"><strong>Totals</strong></td>
             <td id="foot-headcount" style="text-align:right"></td>
-            <td colspan="8"></td>
+            <td id="foot-diff-hc" style="text-align:right"></td>
+            <td colspan="9"></td>
             <td id="foot-avg"></td>
             <td id="foot-total"></td>
           </tr>
@@ -634,6 +666,12 @@
       </label>
       <label>Position:
         <select id="mover-position"></select>
+      </label>
+      <label>Branch tier:
+        <select id="mover-branch">
+          <option value="std" selected>Standard (8 branches)</option>
+          <option value="diff">Houston / San Antonio</option>
+        </select>
       </label>
       <label>Avg hourly tips (display only):
         <select id="mover-tips">
@@ -711,29 +749,32 @@ function defaultState() {
       agmPct: 50,
       otherComp: 0,
       ceilingPct: 16,
+      fteBasis: 2080,
+      branchDiff: -1.00,
+      bulkDiffPct: 20,
       distLow: 20, distMed: 60, distHigh: 20,
       multLow: 50, multMed: 80, multHigh: 100,
     },
     positions: {
-      copilot: { headcount: 147, hrsPerYr: 1700,
+      copilot: { headcount: 147, diffHc: 29, hrsPerYr: 1700,
         base:   { current: 18.00, A: 20.00, B: 20.00, C: 18.00 },
         varMax: { current: 1.50,  A: 0.00,  B: 1.50,  C: 1.50  } },
-      jr:      { headcount: 21, hrsPerYr: 1900,
+      jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1900,
         base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
         varMax: { current: 1.75,  A: 2.25,  B: 2.25,  C: 1.75  } },
-      reg:     { headcount: 32, hrsPerYr: 1900,
+      reg:     { headcount: 32, diffHc: 6, hrsPerYr: 1900,
         base:   { current: 20.00, A: 21.50, B: 21.50, C: 20.00 },
         varMax: { current: 2.00,  A: 2.50,  B: 2.50,  C: 2.00  } },
-      sr:      { headcount: 15, hrsPerYr: 1900,
+      sr:      { headcount: 15, diffHc: 3, hrsPerYr: 1900,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
         varMax: { current: 2.25,  A: 2.75,  B: 2.75,  C: 2.25  } },
-      master:  { headcount: 15, hrsPerYr: 1900,
+      master:  { headcount: 15, diffHc: 3, hrsPerYr: 1900,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
         varMax: { current: 3.00,  A: 3.50,  B: 3.50,  C: 3.00  } },
-      general: { headcount: 11, hrsPerYr: 1900,
+      general: { headcount: 11, diffHc: 2, hrsPerYr: 1900,
         base:   { current: 20.50, A: 23.00, B: 23.00, C: 20.50 },
         varMax: { current: 3.75,  A: 3.75,  B: 3.75,  C: 3.75  } },
-      hof:     { headcount: 14, hrsPerYr: 1900,
+      hof:     { headcount: 14, diffHc: 3, hrsPerYr: 1900,
         base:   { current: 21.68, A: 21.68, B: 21.68, C: 21.68 },
         varMax: { current: 1.75,  A: 1.75,  B: 1.75,  C: 1.75  } },
     },
@@ -741,11 +782,31 @@ function defaultState() {
     moverPosition: 'copilot',
     moverScenario: 'A',
     moverTips: '5,8',
+    moverBranch: 'std',
   };
 }
 
+// Forward-compat shim — fill in fields added after a state was saved/shared
+function migrateState(s) {
+  if (!s) return s;
+  const def = defaultState();
+  // New globals introduced in v1.1 (branch differential + FTE basis)
+  ['fteBasis', 'branchDiff', 'bulkDiffPct'].forEach(k => {
+    if (s.globals[k] === undefined) s.globals[k] = def.globals[k];
+  });
+  // diffHc per position
+  Object.keys(s.positions).forEach(posId => {
+    if (s.positions[posId].diffHc === undefined) {
+      const hc = s.positions[posId].headcount || 0;
+      const pct = (s.globals.bulkDiffPct || 20) / 100;
+      s.positions[posId].diffHc = Math.round(hc * pct);
+    }
+  });
+  return s;
+}
+
 // URL hash takes precedence over localStorage (someone shared a link)
-let state = loadStateFromUrl() || loadState() || defaultState();
+let state = migrateState(loadStateFromUrl() || loadState()) || defaultState();
 let loadedFromShare = !!loadStateFromUrl();
 
 function loadState() {
@@ -813,26 +874,37 @@ function calcPosition(posId, scenario) {
   const mL = g.multLow / 100, mM = g.multMed / 100, mH = g.multHigh / 100;
   const dL = g.distLow / 100, dM = g.distMed / 100, dH = g.distHigh / 100;
 
-  // TCC at each perf level
+  // TCC at each perf level (standard branches — for display)
   const tccLow  = base + varMax * mL;
   const tccMed  = base + varMax * mM;
   const tccHigh = base + varMax * mH;
 
-  // Expected variable bonus per hour (distribution-weighted)
+  // Expected variable bonus per hour (distribution-weighted) — same all branches
   const expectedVarPerHr = varMax * (dL * mL + dM * mM + dH * mH);
-  const avgPerHr = base + expectedVarPerHr;
 
-  // Annual cost: base hours + expected variable
-  const annualBase = p.headcount * p.hrsPerYr * base;
+  // Branch differential: Houston + SAA pay base − |diff|. Variable unchanged.
+  const diffHc = Math.min(p.diffHc || 0, p.headcount);
+  const stdHc = p.headcount - diffHc;
+  const branchDiff = g.branchDiff || 0;
+  const baseDiff = base + branchDiff; // typically lower
+  // Avg base across all heads (weighted by HC, assumes same hrs/yr at each branch)
+  const blendedBase = p.headcount > 0 ? (stdHc * base + diffHc * baseDiff) / p.headcount : base;
+  const avgPerHr = blendedBase + expectedVarPerHr;
+
+  // Annual cost: standard + differential branches, base differs / var identical
+  const annualBaseStd  = stdHc  * p.hrsPerYr * base;
+  const annualBaseDiff = diffHc * p.hrsPerYr * baseDiff;
+  const annualBase = annualBaseStd + annualBaseDiff;
   const annualVar  = p.headcount * p.hrsPerYr * expectedVarPerHr;
   const annualCost = annualBase + annualVar;
 
   return {
-    base, varMax,
+    base, varMax, baseDiff, blendedBase,
     tccLow, tccMed, tccHigh,
     expectedVarPerHr, avgPerHr,
     annualBase, annualVar, annualCost,
     headcount: p.headcount,
+    diffHc, stdHc,
     hrsPerYr: p.hrsPerYr,
   };
 }
@@ -848,13 +920,14 @@ function calcRaisePct(posId, scenario, level) {
 }
 
 function calcScenarioTotals(scenario) {
-  let totalBase = 0, totalVar = 0, totalCost = 0, totalHeadcount = 0, totalHrs = 0;
+  let totalBase = 0, totalVar = 0, totalCost = 0, totalHeadcount = 0, totalDiffHc = 0, totalHrs = 0;
   POSITIONS.forEach(p => {
     const r = calcPosition(p.id, scenario);
     totalBase += r.annualBase;
     totalVar  += r.annualVar;
     totalCost += r.annualCost;
     totalHeadcount += r.headcount;
+    totalDiffHc += r.diffHc;
     totalHrs += r.headcount * r.hrsPerYr;
   });
   const avgPerHr = totalHrs > 0 ? totalCost / totalHrs : 0;
@@ -867,9 +940,11 @@ function calcScenarioTotals(scenario) {
   const moverCompToAgm = agmDollars > 0 ? (totalCost / agmDollars) * 100 : 0;
   const totalCompToAgm = agmDollars > 0 ? (totalAllComp / agmDollars) * 100 : 0;
   const totalCompToRev = revenue > 0 ? (totalAllComp / revenue) * 100 : 0;
-  return { totalBase, totalVar, totalCost, totalHeadcount, totalHrs, avgPerHr,
+  const fteBasis = g.fteBasis || 2080;
+  const impliedFtes = fteBasis > 0 ? totalHrs / fteBasis : 0;
+  return { totalBase, totalVar, totalCost, totalHeadcount, totalDiffHc, totalHrs, avgPerHr,
            moverCompToRev, moverCompToAgm, totalCompToAgm, totalCompToRev,
-           totalAllComp, otherComp, revenue, agmDollars };
+           totalAllComp, otherComp, revenue, agmDollars, impliedFtes, fteBasis };
 }
 
 // =============================================================================
@@ -894,6 +969,9 @@ function renderGlobals() {
   document.getElementById('agmDollars').value = Math.round(state.globals.revenue * state.globals.agmPct / 100);
   document.getElementById('otherComp').value = state.globals.otherComp || 0;
   document.getElementById('ceilingPct').value = state.globals.ceilingPct;
+  document.getElementById('fteBasis').value = state.globals.fteBasis || 2080;
+  document.getElementById('branchDiff').value = (state.globals.branchDiff !== undefined ? state.globals.branchDiff : -1.00);
+  document.getElementById('bulkDiffPct').value = state.globals.bulkDiffPct !== undefined ? state.globals.bulkDiffPct : 20;
   document.getElementById('distLow').value = state.globals.distLow;
   document.getElementById('distMed').value = state.globals.distMed;
   document.getElementById('distHigh').value = state.globals.distHigh;
@@ -935,7 +1013,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="13">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="14">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -959,6 +1037,7 @@ function renderMatrix() {
     tr.innerHTML = `
       <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}</td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
+      <td><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/></td>
@@ -981,9 +1060,18 @@ function renderMatrix() {
       const field = e.target.dataset.field;
       const val = parseFloat(e.target.value) || 0;
       const sce2 = activeScenario();
-      if (field === 'headcount' || field === 'hrsPerYr') {
-        // Headcount and hrs are shared across scenarios
-        state.positions[pos][field] = val;
+      if (field === 'headcount' || field === 'hrsPerYr' || field === 'diffHc') {
+        // Headcount, diffHc, and hrs are shared across scenarios
+        // Cap diffHc at headcount
+        if (field === 'diffHc') {
+          state.positions[pos][field] = Math.min(Math.max(0, val), state.positions[pos].headcount);
+        } else {
+          state.positions[pos][field] = val;
+          // If headcount drops below diffHc, cap diffHc
+          if (field === 'headcount' && state.positions[pos].diffHc > val) {
+            state.positions[pos].diffHc = val;
+          }
+        }
       } else {
         state.positions[pos][field][sce2] = val;
       }
@@ -995,6 +1083,7 @@ function renderMatrix() {
   // Footer totals
   const tot = calcScenarioTotals(sce);
   document.getElementById('foot-headcount').textContent = tot.totalHeadcount;
+  document.getElementById('foot-diff-hc').textContent = tot.totalDiffHc;
   document.getElementById('foot-avg').textContent = fmt$2(tot.avgPerHr);
   document.getElementById('foot-total').textContent = fmt$(tot.totalCost);
 }
@@ -1054,7 +1143,12 @@ function renderAggregate() {
     <div class="stat">
       <div class="label">Mover Headcount</div>
       <div class="big">${cmp.totalHeadcount}</div>
-      <div class="delta">${Math.round(cmp.totalHrs).toLocaleString()} hrs/yr · AGM ${fmtM(cmp.agmDollars)}</div>
+      <div class="delta">${cmp.totalDiffHc} at Houston + SAA (base ${(state.globals.branchDiff || 0) >= 0 ? '+' : '−'}$${Math.abs(state.globals.branchDiff || 0).toFixed(2)})</div>
+    </div>
+    <div class="stat">
+      <div class="label">Implied FTEs <span style="font-size:10px;font-weight:400;opacity:0.7">@ ${(cmp.fteBasis || 2080).toLocaleString()} hrs/yr</span></div>
+      <div class="big">${cmp.impliedFtes.toFixed(0)}</div>
+      <div class="delta">${Math.round(cmp.totalHrs).toLocaleString()} mover-hrs/yr · ${cmp.totalHeadcount > 0 ? (cmp.impliedFtes / cmp.totalHeadcount * 100).toFixed(0) : 0}% of headcount as FTE</div>
     </div>
   `;
 
@@ -1090,6 +1184,22 @@ function renderAggregate() {
   `).join('');
 }
 
+// Apply branch-tier base shift to a calcPosition result (for individual mover view)
+function applyBranchShift(r, shift) {
+  if (!shift) return r;
+  const newBase = r.base + shift;
+  const g = state.globals;
+  const mL = g.multLow / 100, mM = g.multMed / 100, mH = g.multHigh / 100;
+  return {
+    ...r,
+    base: newBase,
+    tccLow: newBase + r.varMax * mL,
+    tccMed: newBase + r.varMax * mM,
+    tccHigh: newBase + r.varMax * mH,
+    avgPerHr: newBase + r.expectedVarPerHr,
+  };
+}
+
 function renderMoverView() {
   // Position dropdown
   const posSel = document.getElementById('mover-position');
@@ -1104,18 +1214,33 @@ function renderMoverView() {
   posSel.value = state.moverPosition;
   document.getElementById('mover-scenario').value = state.moverScenario;
   document.getElementById('mover-tips').value = state.moverTips;
+  document.getElementById('mover-branch').value = state.moverBranch || 'std';
 
   const posId = state.moverPosition;
   const sce = state.moverScenario;
+  const branch = state.moverBranch || 'std';
   const p = POSITIONS.find(x => x.id === posId);
-  const cur = calcPosition(posId, 'current');
-  const sceR = calcPosition(posId, sce);
+  const curRaw = calcPosition(posId, 'current');
+  const sceRaw = calcPosition(posId, sce);
+
+  // Apply branch-tier base shift for an individual mover's announcement view
+  const branchShift = branch === 'diff' ? (state.globals.branchDiff || 0) : 0;
+  const cur = applyBranchShift(curRaw, branchShift);
+  const sceR = applyBranchShift(sceRaw, branchShift);
+
   const tips = state.moverTips.split(',').map(Number);
   const tipsLow = tips[0], tipsHigh = tips[1];
 
-  const rL = calcRaisePct(posId, sce, 'low');
-  const rM = calcRaisePct(posId, sce, 'med');
-  const rH = calcRaisePct(posId, sce, 'high');
+  // Raise % at the chosen branch tier (apples-to-apples within the tier)
+  const raiseAt = (level) => {
+    const curT = level === 'low' ? cur.tccLow : level === 'med' ? cur.tccMed : cur.tccHigh;
+    const sceT = level === 'low' ? sceR.tccLow : level === 'med' ? sceR.tccMed : sceR.tccHigh;
+    if (curT === 0) return null;
+    return ((sceT - curT) / curT) * 100;
+  };
+  const rL = raiseAt('low');
+  const rM = raiseAt('med');
+  const rH = raiseAt('high');
 
   const raiseCls = v => v === null ? 'raise-zero' : v > 0.005 ? 'raise-pos' : v < -0.005 ? 'raise-neg' : 'raise-zero';
   const raiseTxt = v => v === null ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
@@ -1139,9 +1264,10 @@ function renderMoverView() {
   const annualVarMed = sceR.varMax * (state.globals.multMed / 100) * sceR.hrsPerYr;
   const annualVarHigh = sceR.varMax * (state.globals.multHigh / 100) * sceR.hrsPerYr;
 
+  const branchLabel = branch === 'diff' ? 'Houston / San Antonio' : 'Standard branches';
   const html = `
-    <h3>${p.name} — Scenario ${sce}</h3>
-    <p class="lede">Your current pay is <strong>$${cur.base.toFixed(2)}/hr base + up to $${cur.varMax.toFixed(2)}/hr variable</strong>. Under the new plan, you'll get <strong>$${sceR.base.toFixed(2)}/hr base + up to $${sceR.varMax.toFixed(2)}/hr variable</strong>, paid out at low / medium / high performance levels.</p>
+    <h3>${p.name} — Scenario ${sce} <span style="font-weight:400;color:#6B6B6B;font-size:13px;">· ${branchLabel}</span></h3>
+    <p class="lede">Your current pay is <strong>$${cur.base.toFixed(2)}/hr base + up to $${cur.varMax.toFixed(2)}/hr variable</strong>. Under the new plan, you'll get <strong>$${sceR.base.toFixed(2)}/hr base + up to $${sceR.varMax.toFixed(2)}/hr variable</strong>, paid out at low / medium / high performance levels.${branch === 'diff' ? ' <em>(Houston + SAA base is $' + Math.abs(state.globals.branchDiff || 0).toFixed(2) + '/hr below the other 8 branches; variable is the same.)</em>' : ''}</p>
     <table class="announce-grid">
       <thead>
         <tr>
@@ -1211,7 +1337,7 @@ function renderAll() {
 // =============================================================================
 
 // Globals inputs
-const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
+const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'fteBasis', 'branchDiff', 'bulkDiffPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
 globalFields.forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input', (e) => {
@@ -1219,6 +1345,17 @@ globalFields.forEach(id => {
     saveState();
     renderAll();
   });
+});
+
+// Bulk-fill Diff HC button
+document.getElementById('apply-bulk-diff').addEventListener('click', () => {
+  const pct = (state.globals.bulkDiffPct || 0) / 100;
+  POSITIONS.forEach(p => {
+    state.positions[p.id].diffHc = Math.round(state.positions[p.id].headcount * pct);
+  });
+  saveState();
+  renderAll();
+  showToast('Diff HC seeded at ' + state.globals.bulkDiffPct + '% across all positions');
 });
 
 // Tabs
@@ -1246,12 +1383,17 @@ document.getElementById('mover-tips').addEventListener('change', e => {
   saveState();
   renderMoverView();
 });
+document.getElementById('mover-branch').addEventListener('change', e => {
+  state.moverBranch = e.target.value;
+  saveState();
+  renderMoverView();
+});
 
 // Export CSV
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Hrs/yr','Scenario','Base $/hr','Var Max $/hr','TCC Low','TCC Med','TCC High','Avg $/hr','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H'].join(','));
   POSITIONS.forEach(p => {
     SCENARIOS.forEach(s => {
       const r = calcPosition(p.id, s);
@@ -1259,10 +1401,10 @@ document.getElementById('export-csv').addEventListener('click', () => {
       const rM = calcRaisePct(p.id, s, 'med');
       const rH = calcRaisePct(p.id, s, 'high');
       lines.push([
-        p.name, p.group, r.headcount, r.hrsPerYr, s,
-        r.base.toFixed(2), r.varMax.toFixed(2),
+        p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
+        r.base.toFixed(2), r.baseDiff.toFixed(2), r.varMax.toFixed(2),
         r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
-        r.avgPerHr.toFixed(2),
+        r.blendedBase.toFixed(2), r.avgPerHr.toFixed(2),
         Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost),
         s === 'current' ? '' : (rL || 0).toFixed(2),
         s === 'current' ? '' : (rM || 0).toFixed(2),
@@ -1298,6 +1440,8 @@ document.getElementById('export-csv').addEventListener('click', () => {
   lines.push('AGM $,' + Math.round(state.globals.revenue * state.globals.agmPct / 100) + ',,,,,,,,,,,,,,,');
   lines.push('All Other Annual Comp $,' + (state.globals.otherComp || 0) + ',,,,,,,,,,,,,,,');
   lines.push('Comp-to-AGM Ceiling %,' + state.globals.ceilingPct + ',,,,,,,,,,,,,,,');
+  lines.push('FTE Basis (hrs/yr),' + (state.globals.fteBasis || 2080) + ',,,,,,,,,,,,,,,');
+  lines.push('Branch Differential $/hr (Houston + SAA),' + (state.globals.branchDiff || 0).toFixed(2) + ',,,,,,,,,,,,,,,');
   lines.push('Dist L/M/H %,' + state.globals.distLow + '/' + state.globals.distMed + '/' + state.globals.distHigh + ',,,,,,,,,,,,,,,');
   lines.push('Mult L/M/H %,' + state.globals.multLow + '/' + state.globals.multMed + '/' + state.globals.multHigh + ',,,,,,,,,,,,,,,');
 
