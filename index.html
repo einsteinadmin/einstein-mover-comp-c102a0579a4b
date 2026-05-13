@@ -1190,7 +1190,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.2).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.3).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1235,7 +1235,7 @@
         <li><code>general</code> · Lead General · lead · $20.50 · $3.75</li>
         <li><code>hof</code> · HOF (legacy) · legacy · $21.68 · $1.75</li>
       </ul>
-      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 0 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: Co-Pilot 1,700 (PT-heavy entry); leads 1,900.</p>
+      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 0 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended; refine per-position as payroll data lands).</p>
       <p><strong>Lead in Waiting</strong> is a forward-looking placeholder for a new role between Co-Pilot and Jr. Lead. Zeroed across all four scenarios in v2.7 — fill in base/var/headcount when the role is defined and we want to model its cost.</p>
 
       <p><strong>Three scenarios:</strong></p>
@@ -1248,13 +1248,13 @@
 
       <p><strong>Globals (id · default · purpose):</strong></p>
       <ul>
-        <li><code>revenue</code> · $24M · annual revenue baseline</li>
-        <li><code>agmPct</code> · 50% · AGM as % of revenue</li>
-        <li><code>otherComp</code> · $0 · manager + leadership comp (gates Manager Affordability module)</li>
-        <li><code>ceilingPct</code> · 40% · Mover Comp ÷ Revenue ceiling</li>
+        <li><code>revenue</code> · $26.4M · annual revenue baseline</li>
+        <li><code>agmPct</code> · 53% · AGM as % of revenue</li>
+        <li><code>otherComp</code> · $2.8M · manager + leadership comp (gates Manager Affordability module)</li>
+        <li><code>ceilingPct</code> · 40% · Mover Comp ÷ Revenue ceiling (applied to LOADED)</li>
         <li><code>mgmtCeilingPct</code> · 16% · Manager Comp ÷ AGM ceiling (philosophy doc)</li>
         <li><code>burdenPct</code> · 13% · Benefits & burden multiplier (payroll taxes + WC + retirement match + health insurance). Drives True Annual Cost AND the loaded Mover Cost ÷ Revenue ceiling card.</li>
-        <li><code>fteBasis</code> · 2,080 · hrs/yr per FTE for Implied FTEs card</li>
+        <li><code>fteBasis</code> · 1,820 · hrs/yr per FTE (35 × 52). Drives Implied FTEs card.</li>
         <li><code>branchDiff</code> · −$1.00 · Houston + SAA base differential</li>
         <li><code>bulkDiffPct</code> · 20% · helper for "Apply to all positions" Diff HC bulk-fill</li>
         <li><code>distLow/Med/High</code> · 20/60/20% · performance distribution (must sum to 100)</li>
@@ -1349,6 +1349,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.3 (5/13)</strong> — Baked Cameron's working state as the new defaults (revenue $26.4M, AGM 53%, manager comp $2.8M, all positions hrs/yr 1,550, lead var-max A/B re-tuned). FTE basis default 2,080 → <strong>1,820</strong> (35 hr/wk × 52 wks). Migration shim now repairs <code>fteBasis ≤ 0</code> to default.</li>
         <li><strong>v3.2 (5/13)</strong> — Added <strong>Saved Versions</strong> system. Snapshot the full state (globals + all scenarios + UI) under a name; reload later to restore exactly. Per-save share-link button generates a URL pointing at the saved state. Export-all-as-JSON / Import-from-JSON for cross-machine portability. Stored in localStorage at <code>einstein-mover-comp-saves-v1</code>, separate from the live working state.</li>
         <li><strong>v3.1 (5/13)</strong> — Burden default tuned from 20% → <strong>13%</strong> per Cameron's estimate (payroll taxes + workers comp + retirement match + health insurance). The Mover Comp ÷ Revenue ceiling now applies to the LOADED figure (wages × 1.13), making the 40% ceiling a true affordability gate. New "Mover Wages ÷ Revenue (unloaded)" reference card sits alongside for industry-benchmark comparison. Removed redundant "True Mover Cost ÷ Revenue" placeholder from Combined module (now covered by the loaded card in Mover Affordability).</li>
         <li><strong>v3.0 (5/13)</strong> — Added <strong>Benefits & burden %</strong> global multiplier capturing employer-side costs above wages. New "True Annual Cost" column at end of position matrix. New "True Total Mover Cost" card in Mover Affordability module. "Essentials only" preset locked to Cameron's spec: Headcount · Base · Var Max · TCC High · Raise % H · Δ/hr max · Annual Cost.</li>
@@ -1412,41 +1413,41 @@ function defaultState() {
   // active scenarios under discussion. Reset clears back to these.
   return {
     globals: {
-      revenue: 24000000,
-      agmPct: 50,
-      otherComp: 0,
+      revenue: 26400000,
+      agmPct: 53,
+      otherComp: 2800000,
       ceilingPct: 40,
       mgmtCeilingPct: 16,
       burdenPct: 13,
-      fteBasis: 2080,
+      fteBasis: 1820,
       branchDiff: -1.00,
       bulkDiffPct: 20,
       distLow: 20, distMed: 60, distHigh: 20,
       multLow: 50, multMed: 80, multHigh: 100,
     },
     positions: {
-      copilot: { headcount: 147, diffHc: 29, hrsPerYr: 1700,
+      copilot: { headcount: 147, diffHc: 29, hrsPerYr: 1550,
         base:   { current: 18.00, A: 20.00, B: 20.00, C: 18.00 },
         varMax: { current: 1.50,  A: 0.00,  B: 1.50,  C: 1.50  } },
-      waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1900,
+      waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1550,
         base:   { current: 0.00, A: 0.00, B: 0.00, C: 0.00 },
         varMax: { current: 0.00, A: 0.00, B: 0.00, C: 0.00 } },
-      jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1900,
+      jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1550,
         base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
-        varMax: { current: 1.75,  A: 2.25,  B: 2.25,  C: 1.75  } },
-      reg:     { headcount: 32, diffHc: 6, hrsPerYr: 1900,
+        varMax: { current: 1.75,  A: 2.00,  B: 2.25,  C: 1.75  } },
+      reg:     { headcount: 32, diffHc: 6, hrsPerYr: 1550,
         base:   { current: 20.00, A: 21.50, B: 21.50, C: 20.00 },
-        varMax: { current: 2.00,  A: 2.50,  B: 2.50,  C: 2.00  } },
-      sr:      { headcount: 15, diffHc: 3, hrsPerYr: 1900,
+        varMax: { current: 2.00,  A: 2.25,  B: 2.50,  C: 2.00  } },
+      sr:      { headcount: 15, diffHc: 3, hrsPerYr: 1550,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
-        varMax: { current: 2.25,  A: 2.75,  B: 2.75,  C: 2.25  } },
-      master:  { headcount: 15, diffHc: 3, hrsPerYr: 1900,
+        varMax: { current: 2.25,  A: 2.50,  B: 2.75,  C: 2.25  } },
+      master:  { headcount: 15, diffHc: 3, hrsPerYr: 1550,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
-        varMax: { current: 3.00,  A: 3.50,  B: 3.50,  C: 3.00  } },
-      general: { headcount: 11, diffHc: 2, hrsPerYr: 1900,
+        varMax: { current: 3.00,  A: 3.25,  B: 3.50,  C: 3.00  } },
+      general: { headcount: 11, diffHc: 2, hrsPerYr: 1550,
         base:   { current: 20.50, A: 23.00, B: 23.00, C: 20.50 },
-        varMax: { current: 3.75,  A: 3.75,  B: 3.75,  C: 3.75  } },
-      hof:     { headcount: 14, diffHc: 3, hrsPerYr: 1900,
+        varMax: { current: 3.75,  A: 3.25,  B: 3.75,  C: 3.75  } },
+      hof:     { headcount: 14, diffHc: 3, hrsPerYr: 1550,
         base:   { current: 21.68, A: 21.68, B: 21.68, C: 21.68 },
         varMax: { current: 1.75,  A: 1.75,  B: 1.75,  C: 1.75  } },
     },
@@ -1474,6 +1475,10 @@ function migrateState(s) {
   ['fteBasis', 'branchDiff', 'bulkDiffPct'].forEach(k => {
     if (s.globals[k] === undefined) s.globals[k] = def.globals[k];
   });
+  // v3.3: fteBasis must be > 0 — falsy values (0) from earlier sessions get repaired
+  if (!s.globals.fteBasis || s.globals.fteBasis <= 0) {
+    s.globals.fteBasis = def.globals.fteBasis;
+  }
   // v2.5: two-ceiling model. If old state has ceilingPct=16 (legacy AGM-ish
   // default), interpret it as the manager-ceiling and switch mover ceiling to 40.
   if (s.globals.mgmtCeilingPct === undefined) {
