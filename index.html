@@ -749,23 +749,25 @@
       </div>
       <div class="input-block">
         <label>Mover Comp ÷ Revenue Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
-          <strong>Mover-only affordability check.</strong> Industry typical is 30–40% of revenue for mover wages. Default 40%. Compared against <em>unloaded</em> wages (no burden). See "Benefits & burden %" for loaded-cost view.<br/><br/>
-          Applies tone to the "Mover Affordability" card — green comfortably under, warn approaching, red over.
+          <strong>Mover affordability check, evaluated against the LOADED (burdened) cost.</strong> Default 40%.<br/><br/>
+          Loaded = wages × (1 + Benefits & burden %). The card next door turns green / warn / red against this ceiling.<br/><br/>
+          If you'd like a separate ceiling for unloaded wages too, drop the request and I'll wire one up.
         </span></span></label>
         <input type="number" id="ceilingPct" value="40" step="0.5" />
-        <span class="hint">Mover wages ÷ revenue. Default 40%.</span>
+        <span class="hint">Loaded mover cost ÷ revenue. Default 40%.</span>
       </div>
       <div class="input-block">
         <label>Benefits & burden % <span class="tip" tabindex="0">?<span class="tip-body">
-          <strong>True-cost multiplier on top of wages.</strong> Captures employer-side costs that aren't in base or variable pay:<br/><br/>
-          <span class="tip-flag">•</span> FICA employer match (7.65%)<br/>
-          <span class="tip-flag">•</span> FUTA + SUTA unemployment (~1–4%)<br/>
-          <span class="tip-flag">•</span> Workers comp insurance (high for movers — 4–8%)<br/>
-          <span class="tip-flag">•</span> 401k match, benefits, paid training (variable)<br/><br/>
-          Default 20%. Confirm actual rate with Ben / Prosper. Applies to base + variable identically.
+          <strong>True-cost multiplier on top of wages — currently estimated at 13%.</strong> Each $1 of wage actually costs the company ~$1.13.<br/><br/>
+          What's included:<br/>
+          <span class="tip-flag">•</span> Payroll taxes (FICA / FUTA / SUTA)<br/>
+          <span class="tip-flag">•</span> Workers comp insurance<br/>
+          <span class="tip-flag">•</span> Retirement match<br/>
+          <span class="tip-flag">•</span> Health insurance<br/><br/>
+          Applies to base + variable identically. The 40% Mover Comp ÷ Revenue ceiling is evaluated against the loaded (burdened) figure.
         </span></span></label>
-        <input type="number" id="burdenPct" value="20" step="0.5" />
-        <span class="hint">Loaded-cost multiplier. Default 20%.</span>
+        <input type="number" id="burdenPct" value="13" step="0.5" />
+        <span class="hint">Loaded-cost multiplier. Default 13%.</span>
       </div>
       <div class="input-block">
         <label>Manager + Leadership Comp $ <span class="tip" tabindex="0">?<span class="tip-body">
@@ -1093,7 +1095,7 @@
       <h3>Aggregate impact — three affordability lenses</h3>
       <p>The Aggregate Impact section is split into three modules, each with its own ceiling and its own audience:</p>
       <ul>
-        <li><strong>🚚 Mover Affordability</strong> — total mover comp, Mover Comp ÷ Revenue (vs the 40% ceiling), blended $/hr, base/variable split, headcount, implied FTEs. This is the primary affordability check — green/warn/red against the ceiling.</li>
+        <li><strong>🚚 Mover Affordability</strong> — total mover wages, true loaded mover cost (wages × burden multiplier), Mover Cost ÷ Revenue (loaded; vs the 40% ceiling), unloaded wages ÷ revenue (reference), blended $/hr, base/variable split, headcount, implied FTEs. The 40% ceiling tone applies to the LOADED card.</li>
         <li><strong>👔 Manager + Leadership Affordability</strong> — Manager Comp ÷ AGM (vs the 16% ceiling per the philosophy doc), plus Manager Comp ÷ Revenue as a secondary view. Only populates if you fill in "Manager + Leadership Comp $" in globals (otherwise grayed out).</li>
         <li><strong>📊 Combined / All-In</strong> — placeholder/working set of revenue-based ratios: Total Comp ÷ Revenue, Total Comp ÷ AGM, Revenue per Mover Head, Revenue per FTE. We'll refine which metrics matter most once we've used it a few times.</li>
       </ul>
@@ -1118,7 +1120,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.0).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.1).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1181,7 +1183,7 @@
         <li><code>otherComp</code> · $0 · manager + leadership comp (gates Manager Affordability module)</li>
         <li><code>ceilingPct</code> · 40% · Mover Comp ÷ Revenue ceiling</li>
         <li><code>mgmtCeilingPct</code> · 16% · Manager Comp ÷ AGM ceiling (philosophy doc)</li>
-        <li><code>burdenPct</code> · 20% · Benefits & burden multiplier (FICA + WC + benefits above wages). Drives True Annual Cost.</li>
+        <li><code>burdenPct</code> · 13% · Benefits & burden multiplier (payroll taxes + WC + retirement match + health insurance). Drives True Annual Cost AND the loaded Mover Cost ÷ Revenue ceiling card.</li>
         <li><code>fteBasis</code> · 2,080 · hrs/yr per FTE for Implied FTEs card</li>
         <li><code>branchDiff</code> · −$1.00 · Houston + SAA base differential</li>
         <li><code>bulkDiffPct</code> · 20% · helper for "Apply to all positions" Diff HC bulk-fill</li>
@@ -1205,7 +1207,7 @@
 
       <h3>7. Three affordability modules</h3>
       <ul>
-        <li><strong>🚚 Mover Affordability</strong> — total mover comp, Mover Comp ÷ Revenue (vs 40% ceiling), blended $/hr, base/variable split, headcount, implied FTEs</li>
+        <li><strong>🚚 Mover Affordability</strong> — total mover wages + loaded cost, Mover Cost ÷ Revenue loaded (vs 40% ceiling), unloaded wages ÷ revenue (reference), blended $/hr, base/variable split, headcount, implied FTEs</li>
         <li><strong>👔 Manager Affordability</strong> — gated on <code>otherComp &gt; 0</code>. Manager Comp $, Manager Comp ÷ AGM (vs 16% ceiling), Manager Comp ÷ Revenue</li>
         <li><strong>📊 Combined / All-In</strong> (placeholder) — Total All-In Comp, Total Comp ÷ Revenue, Total Comp ÷ AGM, Revenue ÷ Mover Headcount, Revenue ÷ Implied FTE</li>
       </ul>
@@ -1276,7 +1278,8 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
-        <li><strong>v3.0 (5/13)</strong> — Added <strong>Benefits & burden %</strong> global multiplier (default 20%) capturing employer-side costs above wages (FICA, FUTA/SUTA, workers comp, benefits). New "True Annual Cost" column at end of position matrix. New "True Total Mover Cost" card in Mover Affordability module. New "True Mover Cost ÷ Revenue" card in Combined module. Existing Mover Comp ÷ Revenue ceiling (40%) remains on UNLOADED wages (industry standard); burden gives the parallel loaded-cost view. "Essentials only" preset updated to Cameron's spec: Headcount · Base · Var Max · TCC High · Raise % H · Δ/hr max · Annual Cost.</li>
+        <li><strong>v3.1 (5/13)</strong> — Burden default tuned from 20% → <strong>13%</strong> per Cameron's estimate (payroll taxes + workers comp + retirement match + health insurance). The Mover Comp ÷ Revenue ceiling now applies to the LOADED figure (wages × 1.13), making the 40% ceiling a true affordability gate. New "Mover Wages ÷ Revenue (unloaded)" reference card sits alongside for industry-benchmark comparison. Removed redundant "True Mover Cost ÷ Revenue" placeholder from Combined module (now covered by the loaded card in Mover Affordability).</li>
+        <li><strong>v3.0 (5/13)</strong> — Added <strong>Benefits & burden %</strong> global multiplier capturing employer-side costs above wages. New "True Annual Cost" column at end of position matrix. New "True Total Mover Cost" card in Mover Affordability module. "Essentials only" preset locked to Cameron's spec: Headcount · Base · Var Max · TCC High · Raise % H · Δ/hr max · Annual Cost.</li>
         <li><strong>v2.9 (5/13)</strong> — Added "Δ $/hr (low)" and "Δ $/hr (med)" columns alongside the existing (max). Three-tier dollar-delta view of any scenario vs Current. Default visible; "Essentials only" preset hides low + med (keeps max). All three in CSV export. Group-divider colspan now 18.</li>
         <li><strong>v2.8 (5/13)</strong> — Added "Δ $/hr (max)" column to position matrix: absolute $/hr increase vs Current TCC at high-performance (max variable). Hideable, in CSV export. Sits between Raise % H and Avg $/hr.</li>
         <li><strong>v2.7.2 (5/13)</strong> — Fully hardened state migration: missing UI fields (moverPosition, hiddenCols) and invalid moverPosition references both fall back to defaults. Previous v2.7.1 fixed missing positions only.</li>
@@ -1342,7 +1345,7 @@ function defaultState() {
       otherComp: 0,
       ceilingPct: 40,
       mgmtCeilingPct: 16,
-      burdenPct: 20,
+      burdenPct: 13,
       fteBasis: 2080,
       branchDiff: -1.00,
       bulkDiffPct: 20,
@@ -1779,12 +1782,19 @@ function renderAggregate() {
 
   const deltaCost = cmp.totalCost - cur.totalCost;
   const deltaPct = cur.totalCost > 0 ? (deltaCost / cur.totalCost) * 100 : 0;
-  const deltaRev = cmp.moverCompToRev - cur.moverCompToRev;
   const deltaAvg = cmp.avgPerHr - cur.avgPerHr;
   const deltaAvgPct = cur.avgPerHr > 0 ? (deltaAvg / cur.avgPerHr) * 100 : 0;
   const moverCeiling = state.globals.ceilingPct;
   const mgmtCeiling = state.globals.mgmtCeilingPct;
   const hasOtherComp = (state.globals.otherComp || 0) > 0;
+
+  // Loaded mover cost (wages × (1 + burden %)) for the ceiling card
+  const burdenMult = 1 + (state.globals.burdenPct || 0) / 100;
+  const cmpLoaded  = cmp.totalCost * burdenMult;
+  const curLoaded  = cur.totalCost * burdenMult;
+  const loadedPctRev    = cmp.revenue > 0 ? (cmpLoaded / cmp.revenue) * 100 : 0;
+  const curLoadedPctRev = cmp.revenue > 0 ? (curLoaded / cmp.revenue) * 100 : 0;
+  const deltaRev = loadedPctRev - curLoadedPctRev;
 
   // Generic ceiling tone helper
   const toneFor = (v, ceil) => {
@@ -1792,7 +1802,7 @@ function renderAggregate() {
     if (v > ceil - 1.5) return 'warn';
     return 'good';
   };
-  const moverTone = toneFor(cmp.moverCompToRev, moverCeiling);
+  const moverTone = toneFor(loadedPctRev, moverCeiling);
   const ceilingDelta = (v, ceil) => v < ceil
     ? 'under by ' + (ceil - v).toFixed(2) + 'pp'
     : 'OVER by ' + (v - ceil).toFixed(2) + 'pp';
@@ -1814,9 +1824,14 @@ function renderAggregate() {
       <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaTrueCost) + ' vs current (loaded)'}</div>
     </div>
     <div class="stat ${moverTone}">
-      <div class="label">Mover Comp ÷ Revenue</div>
+      <div class="label">Mover Cost ÷ Revenue <span style="font-size:10px;font-weight:400;opacity:0.7">loaded · +${state.globals.burdenPct || 0}% burden</span></div>
+      <div class="big">${fmtPct(loadedPctRev)}</div>
+      <div class="delta">Ceiling ${moverCeiling}% · ${ceilingDelta(loadedPctRev, moverCeiling)}${isCurrent ? '' : ' · ' + (deltaRev >= 0 ? '+' : '') + (deltaRev * 100).toFixed(0) + ' bps vs current'}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mover Wages ÷ Revenue <span style="font-size:10px;font-weight:400;opacity:0.7">unloaded reference</span></div>
       <div class="big">${fmtPct(cmp.moverCompToRev)}</div>
-      <div class="delta">Ceiling ${moverCeiling}% · ${ceilingDelta(cmp.moverCompToRev, moverCeiling)}${isCurrent ? '' : ' · ' + (deltaRev >= 0 ? '+' : '') + (deltaRev * 100).toFixed(0) + ' bps vs current'}</div>
+      <div class="delta">Wages only, no burden</div>
     </div>
     <div class="stat">
       <div class="label">Blended Mover $/hr</div>
@@ -1882,13 +1897,7 @@ function renderAggregate() {
   const totalCompAgm = cmp.totalCompToAgm;
   const revPerHead = cmp.totalHeadcount > 0 ? cmp.revenue / cmp.totalHeadcount : 0;
   const revPerFte  = cmp.impliedFtes > 0 ? cmp.revenue / cmp.impliedFtes : 0;
-  const trueMoverPctRev = cmp.revenue > 0 ? (trueMoverCost / cmp.revenue) * 100 : 0;
   document.getElementById('cards-combined').innerHTML = `
-    <div class="stat placeholder">
-      <div class="label">True Mover Cost ÷ Revenue <span style="font-size:10px;font-weight:400;opacity:0.7">+${state.globals.burdenPct || 0}% burden</span></div>
-      <div class="big">${fmtPct(trueMoverPctRev)}</div>
-      <div class="delta">Loaded mover cost as % of top line</div>
-    </div>
     <div class="stat placeholder">
       <div class="label">Total All-In Comp</div>
       <div class="big">${fmtM(totalAllComp)}</div>
@@ -1927,7 +1936,8 @@ function renderAggregate() {
     { label: 'Total Variable $', fn: t => fmtM(t.totalVar) },
     { label: 'Variable % of Mover Comp', fn: t => (t.totalCost > 0 ? (t.totalVar / t.totalCost * 100).toFixed(1) : 0) + '%' },
     { label: 'Blended Mover $/hr', fn: t => fmt$2(t.avgPerHr) },
-    { label: 'Mover Comp ÷ Revenue (vs ' + state.globals.ceilingPct + '% ceiling)', fn: t => fmtPct(t.moverCompToRev) },
+    { label: 'Mover Wages ÷ Revenue (unloaded)', fn: t => fmtPct(t.moverCompToRev) },
+    { label: 'Mover Cost ÷ Revenue, loaded (vs ' + state.globals.ceilingPct + '% ceiling)', fn: t => fmtPct(t.revenue > 0 ? (t.totalCost * (1 + (state.globals.burdenPct || 0)/100) / t.revenue) * 100 : 0) },
     { label: 'Mover Comp ÷ AGM', fn: t => fmtPct(t.moverCompToAgm) },
     { label: 'Manager Comp ÷ AGM (vs ' + state.globals.mgmtCeilingPct + '% ceiling)', fn: t => hasOther && t.agmDollars > 0 ? fmtPct(t.otherComp / t.agmDollars * 100) : '—' },
     { label: 'Total Comp ÷ Revenue', fn: t => hasOther ? fmtPct(t.totalCompToRev) : '—' },
