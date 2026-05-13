@@ -698,6 +698,7 @@
             <th>TCC Low</th>
             <th>TCC Med</th>
             <th>TCC High</th>
+            <th>Var % (max)</th>
             <th>Raise % L</th>
             <th>Raise % M</th>
             <th>Raise % H</th>
@@ -711,7 +712,7 @@
             <td class="left"><strong>Totals</strong></td>
             <td id="foot-headcount" style="text-align:right"></td>
             <td id="foot-diff-hc" style="text-align:right"></td>
-            <td colspan="9"></td>
+            <td colspan="10"></td>
             <td id="foot-avg"></td>
             <td id="foot-total"></td>
           </tr>
@@ -1182,7 +1183,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="14">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="15">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -1213,6 +1214,7 @@ function renderMatrix() {
       <td>${fmt$2(r.tccLow)}</td>
       <td>${fmt$2(r.tccMed)}</td>
       <td>${fmt$2(r.tccHigh)}</td>
+      <td>${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}</td>
       ${raiseCell(rL)}
       ${raiseCell(rM)}
       ${raiseCell(rH)}
@@ -1562,17 +1564,19 @@ document.getElementById('mover-branch').addEventListener('change', e => {
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H'].join(','));
   POSITIONS.forEach(p => {
     SCENARIOS.forEach(s => {
       const r = calcPosition(p.id, s);
       const rL = calcRaisePct(p.id, s, 'low');
       const rM = calcRaisePct(p.id, s, 'med');
       const rH = calcRaisePct(p.id, s, 'high');
+      const varPct = r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100) : 0;
       lines.push([
         p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
         r.base.toFixed(2), r.baseDiff.toFixed(2), r.varMax.toFixed(2),
         r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
+        varPct.toFixed(1) + '%',
         r.blendedBase.toFixed(2), r.avgPerHr.toFixed(2),
         Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost),
         s === 'current' ? '' : (rL || 0).toFixed(2),
