@@ -703,7 +703,10 @@
       <h1>Mover Compensation Scenario Modeler</h1>
       <p>Toggle base + variable per position. See live impact on annual mover comp, gross margin, and what the announcement looks like to a mover at each tenure tier. Three scenarios you can flip between — A, B, C — plus the locked Current state.</p>
     </div>
-    <button id="open-help" style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.55); border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; backdrop-filter:blur(2px); white-space:nowrap;">📖 How to use this tool</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button id="open-help" style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.55); border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; backdrop-filter:blur(2px); white-space:nowrap;">📖 How to use</button>
+      <button id="open-handoff" style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.55); border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; backdrop-filter:blur(2px); white-space:nowrap;">🔧 Handoff doc</button>
+    </div>
   </div>
 </header>
 
@@ -1073,6 +1076,196 @@
 
       <h3>One thing this tool does NOT do</h3>
       <p>Annual cost is annual — it doesn't model <em>when</em> the cost hits. Summer is heavier (more hours per person) than winter, so a raise effective in May costs more than the same raise effective in November. The annual number is the right number for budgeting; cash-flow timing is a separate conversation.</p>
+
+    </div>
+  </div>
+</div>
+
+<!-- Handoff modal — technical/AI-oriented reference doc -->
+<div id="handoff-modal" class="modal-backdrop" role="dialog" aria-labelledby="handoff-title" aria-modal="true">
+  <div class="modal-panel" style="max-width: 920px;">
+    <div class="modal-head">
+      <h2 id="handoff-title">🔧 Handoff & technical reference</h2>
+      <button class="modal-close" id="close-handoff">Close ✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.5).</em></div>
+
+      <h3>1. What this is</h3>
+      <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
+
+      <h3>2. Live URLs</h3>
+      <ul>
+        <li><strong>Tool:</strong> <code>https://einsteinadmin.github.io/einstein-mover-comp-c102a0579a4b/</code></li>
+        <li><strong>Compensation Philosophy V2.1:</strong> <code>https://einsteinadmin.github.io/einstein-comp-philosophy-276e8bb16733f7ca/</code></li>
+      </ul>
+      <p><strong>Confidentiality:</strong> public-but-obscure — robots.txt + noindex meta + page title "Internal Document" if leaked. Do not forward broadly. Slack-share to specific people, not channels.</p>
+
+      <h3>3. Source of truth</h3>
+      <ul>
+        <li><strong>Canonical source HTML:</strong> <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/mover-comp-scenario-modeler.html</code> (in <code>einsteinadmin/emc-projects</code> private repo)</li>
+        <li><strong>Deploy repo (public, GH Pages):</strong> <code>einsteinadmin/einstein-mover-comp-c102a0579a4b</code> — <code>index.html</code> is a direct copy of source HTML</li>
+        <li><strong>Mirror HANDOFF.md:</strong> same project folder as source HTML</li>
+      </ul>
+      <p><strong>Deploy procedure</strong> (after editing source):</p>
+      <ul>
+        <li>Copy source HTML to <code>/tmp/einstein-mover-comp-deploy/index.html</code></li>
+        <li><code>git add -A &amp;&amp; git commit -m "vX.Y: &lt;what changed&gt;" &amp;&amp; git push origin main</code></li>
+        <li>GH Pages takes 30-60s to publish</li>
+      </ul>
+
+      <h3>4. Architecture (the whole tool in 200 words)</h3>
+      <p><strong>Single file.</strong> ~2,000 lines of HTML/CSS/JS. No build. No dependencies. No backend.</p>
+      <p><strong>State model.</strong> One JavaScript object <code>state</code> holds everything: <code>globals</code> (revenue, ceilings, distributions, multipliers, branch differential, FTE basis), <code>positions</code> (7 positions × {headcount, diffHc, hrsPerYr, base{current,A,B,C}, varMax{current,A,B,C}}), plus UI state (activeTab, mover view selections, hiddenCols).</p>
+      <p><strong>Persistence.</strong> <code>localStorage</code> key <code>einstein-mover-comp-modeler-v1</code>. State also URL-encodable via "📎 Copy share link" (base64 JSON in URL hash).</p>
+      <p><strong>Migration.</strong> Forward-compatible <code>migrateState()</code> fills in new fields from defaults when older saved/shared state loads. Always add a migration block when introducing new globals or position fields.</p>
+      <p><strong>Render loop.</strong> <code>renderAll()</code> → <code>renderGlobals() → renderTabs() → renderMatrix() → renderAggregate() → renderMoverView()</code>. Re-runs on every input change. Cheap enough to not need optimization.</p>
+      <p><strong>Calc.</strong> Two pure functions: <code>calcPosition(posId, scenario)</code> returns per-position economics. <code>calcScenarioTotals(scenario)</code> rolls up to company totals. No state mutation — easy to reason about.</p>
+
+      <h3>5. Data model — positions, scenarios, globals</h3>
+      <p><strong>Seven positions</strong> in display order (id · name · group · default base · default var max):</p>
+      <ul>
+        <li><code>copilot</code> · Co-Pilot · entry · $18.00 · $1.50</li>
+        <li><code>jr</code> · Jr. Lead · lead · $19.50 · $1.75</li>
+        <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
+        <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
+        <li><code>master</code> · Master Lead · lead · $20.50 · $3.00</li>
+        <li><code>general</code> · Lead General · lead · $20.50 · $3.75</li>
+        <li><code>hof</code> · HOF (legacy) · legacy · $21.68 · $1.75</li>
+      </ul>
+      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: Co-Pilot 1,700 (PT-heavy entry); leads 1,900.</p>
+
+      <p><strong>Three scenarios:</strong></p>
+      <ul>
+        <li><strong>Current</strong> — locked baseline, not editable</li>
+        <li><strong>Scenario A — "Flat $20 Co-Pilot."</strong> Co-Pilot base $20/hr, zero variable. Lead positions get base + variable raises. Cameron's hypothesis: simpler entry pay attracts more applicants.</li>
+        <li><strong>Scenario B — "$20 Co-Pilot keeping variable."</strong> Same as A, but Co-Pilots keep $1.50/hr variable. Paul's hypothesis: variable still matters at entry. A vs B delta ≈ +$292K/yr.</li>
+        <li><strong>Scenario C — "No-change baseline."</strong> Editable copy of Current for isolated single-change tests.</li>
+      </ul>
+
+      <p><strong>Globals (id · default · purpose):</strong></p>
+      <ul>
+        <li><code>revenue</code> · $24M · annual revenue baseline</li>
+        <li><code>agmPct</code> · 50% · AGM as % of revenue</li>
+        <li><code>otherComp</code> · $0 · manager + leadership comp (gates Manager Affordability module)</li>
+        <li><code>ceilingPct</code> · 40% · Mover Comp ÷ Revenue ceiling</li>
+        <li><code>mgmtCeilingPct</code> · 16% · Manager Comp ÷ AGM ceiling (philosophy doc)</li>
+        <li><code>fteBasis</code> · 2,080 · hrs/yr per FTE for Implied FTEs card</li>
+        <li><code>branchDiff</code> · −$1.00 · Houston + SAA base differential</li>
+        <li><code>bulkDiffPct</code> · 20% · helper for "Apply to all positions" Diff HC bulk-fill</li>
+        <li><code>distLow/Med/High</code> · 20/60/20% · performance distribution (must sum to 100)</li>
+        <li><code>multLow/Med/High</code> · 50/80/100% · variable % earned at each tier</li>
+      </ul>
+
+      <h3>6. Branch differential math</h3>
+      <p>For each position, headcount splits into two cohorts:</p>
+      <ul>
+        <li>Standard branches (8 of 10): <code>headcount − diffHc</code> people earn <code>base</code></li>
+        <li>Houston + SAA: <code>diffHc</code> people earn <code>base + branchDiff</code></li>
+      </ul>
+      <p>Variable is identical across all branches. Annual cost:</p>
+      <p style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:var(--bg); padding:10px; border-radius:6px; line-height:1.5;">
+        annualBase = (HC − DiffHC) × hrs × base + DiffHC × hrs × (base + branchDiff)<br/>
+        annualVar  = HC × hrs × expectedVarPerHr<br/>
+        expectedVarPerHr = varMax × (distLow×multLow + distMed×multMed + distHigh×multHigh) / 10000<br/>
+        annualCost = annualBase + annualVar
+      </p>
+
+      <h3>7. Three affordability modules</h3>
+      <ul>
+        <li><strong>🚚 Mover Affordability</strong> — total mover comp, Mover Comp ÷ Revenue (vs 40% ceiling), blended $/hr, base/variable split, headcount, implied FTEs</li>
+        <li><strong>👔 Manager Affordability</strong> — gated on <code>otherComp &gt; 0</code>. Manager Comp $, Manager Comp ÷ AGM (vs 16% ceiling), Manager Comp ÷ Revenue</li>
+        <li><strong>📊 Combined / All-In</strong> (placeholder) — Total All-In Comp, Total Comp ÷ Revenue, Total Comp ÷ AGM, Revenue ÷ Mover Headcount, Revenue ÷ Implied FTE</li>
+      </ul>
+      <p>Mover comp scales with revenue (headcount × hours × wage). Manager comp is fixed (salaried). Different ceilings answer different questions — keep them separate.</p>
+
+      <h3>8. UI features worth knowing</h3>
+      <ul>
+        <li><strong>"📖 How to use"</strong> — user-facing walkthrough modal</li>
+        <li><strong>"🔧 Handoff doc"</strong> — this modal</li>
+        <li><strong>"📊 Columns ▾"</strong> picker — toggle any of 11 columns. Presets: Show all / Essentials only. Always-visible: Position, Base, Var Max, Annual Cost</li>
+        <li><strong>Inline baseline values</strong> — small "vs $X.XX" under each editable input on A/B/C tabs only</li>
+        <li><strong>Sticky Position column</strong> — first column pins on horizontal scroll</li>
+        <li><strong>"📎 Copy share link"</strong> — encodes full state to URL, copies to clipboard. Recipient sees exactly your view</li>
+        <li><strong>Mover-view branch toggle</strong> — Standard vs Houston/SAA; re-computes announcement</li>
+        <li><strong>CSV export</strong> — always includes every column regardless of which are hidden</li>
+      </ul>
+
+      <h3>9. Common edits — HOW TO</h3>
+
+      <p><strong>Update headcount / Diff HC defaults:</strong> edit <code>defaultState()</code>, in <code>positions:</code> block, change <code>headcount</code> / <code>diffHc</code>. Save, copy to deploy, push.</p>
+
+      <p><strong>Change a default Base/Var Max for Current:</strong> edit <code>base.current</code> or <code>varMax.current</code> in <code>defaultState()</code>. Reconsider whether A/B/C defaults still represent intended hypothesis.</p>
+
+      <p><strong>Add a new column to the matrix:</strong></p>
+      <ol>
+        <li>Add <code>&lt;th&gt;</code> to the <code>&lt;thead&gt;</code> row. Include <code>class="col-&lt;name&gt;"</code> if hideable</li>
+        <li>In <code>renderMatrix()</code>'s <code>tr.innerHTML</code> template, add a <code>&lt;td&gt;</code> in the right position</li>
+        <li>If hideable: add <code>col-&lt;name&gt;</code> to the <code>&lt;td&gt;</code>, add to <code>HIDEABLE_COLS</code> constant, add checkbox in Columns popover, add CSS rule <code>table.matrix.hide-col-&lt;name&gt; .col-&lt;name&gt; { display: none; }</code></li>
+        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 15)</li>
+        <li>Add to CSV export header + per-row values</li>
+      </ol>
+
+      <p><strong>Add a new affordability metric:</strong> Module 3 (Combined / All-In) is the placeholder home. In <code>renderAggregate()</code>, find <code>// ---------- Module 3</code> block, add a <code>&lt;div class="stat placeholder"&gt;</code> card using existing <code>cmp</code>/<code>cur</code> totals. If you need new data, extend <code>calcScenarioTotals()</code>.</p>
+
+      <p><strong>Tweak a ceiling default:</strong> change in <code>defaultState()</code>, also update <code>&lt;input&gt; value="..."</code> in HTML so fresh loads match. Update migration if old saved state should remap.</p>
+
+      <p><strong>Add a new global:</strong> add to <code>defaultState().globals</code>, add to <code>globalFields</code> array, add migration shim filling default for older state, add <code>&lt;input&gt;</code> in HTML, wire to <code>renderGlobals()</code>.</p>
+
+      <h3>10. Calculation reference (plain language)</h3>
+      <p style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:var(--bg); padding:10px; border-radius:6px; line-height:1.6;">
+        TCC at Low/Med/High = base + varMax × (mult / 100)<br/>
+        Expected variable/hr = varMax × (dist × mult sums) / 10000<br/>
+        Annual position cost = (HC − DiffHC) × hrs × base + DiffHC × hrs × (base + branchDiff) + HC × hrs × expectedVar/hr<br/><br/>
+        Total Mover Comp = Σ annualCost across positions<br/>
+        Mover Comp ÷ Revenue = Total Mover Comp / Revenue<br/>
+        Mover Comp ÷ AGM = Total Mover Comp / (Revenue × AGM%)<br/>
+        Implied FTEs = Total Mover-Hours / FTE basis<br/><br/>
+        Manager Comp ÷ AGM = otherComp / (Revenue × AGM%)<br/>
+        Manager Comp ÷ Revenue = otherComp / Revenue<br/><br/>
+        Total All-In Comp = Total Mover Comp + otherComp<br/>
+        Total Comp ÷ Revenue = Total All-In Comp / Revenue<br/>
+        Revenue per Head = Revenue / Total Headcount<br/>
+        Revenue per FTE = Revenue / Implied FTEs<br/><br/>
+        Raise % at level X = (Scenario TCC at X − Current TCC at X) / Current TCC at X × 100
+      </p>
+
+      <h3>11. Known limitations & open questions</h3>
+      <ul>
+        <li><strong>Annual ≠ phased.</strong> Tool models annual cost only. Summer is heavier than winter — a May-effective raise costs more than a November-effective one. Use the annual number for budgeting; phasing is a separate conversation.</li>
+        <li><strong>Diff HC defaults are guesses</strong> (20%/position). Replace with payroll actuals when available.</li>
+        <li><strong>Performance distribution defaults are guesses</strong> (20/60/20). Plug in real ratings data when Anne's 100-point system produces it.</li>
+        <li><strong>Manager Comp ÷ AGM cohort definition</strong> is still unsettled. Philosophy doc cites ~16% ceiling but doesn't fully specify the cohort. Ben quoted 13.4% YoY on 5/11. Confirm cohort with Ben before treating ceiling as a hard go/no-go.</li>
+        <li><strong>Variable comp assumes multiplier model</strong> — fixed % of max per tier. If we shift to continuous scorecard-driven variable, the dist + mult model gets replaced.</li>
+        <li><strong>Combined / All-In is intentionally placeholder.</strong> Five metrics are working but the right set is TBD.</li>
+        <li><strong>No undo inside the tool.</strong> Resetting all scenarios wipes prior state. Use share links to snapshot, or "Copy JSON" before reset.</li>
+        <li><strong>State migration handles missing fields, not missing positions.</strong> If localStorage is manually corrupted to drop a position, <code>calcPosition</code> throws. Real users won't hit this.</li>
+      </ul>
+
+      <h3>12. Decisions log (newest first)</h3>
+      <ul>
+        <li><strong>v2.5 (5/13)</strong> — biggest framing change. Replaced single "Comp-to-AGM" ceiling with two distinct ceilings: Mover Comp ÷ Revenue (40%) and Manager Comp ÷ AGM (16%). Restructured Aggregate into three modules — Mover, Manager (gated on otherComp), Combined (placeholder). Added sticky Position column. Embedded handoff modal added.</li>
+        <li><strong>v2.4 (5/13)</strong> — extended single-column hide to full Columns picker popover (11 hideable, 4 always-visible) with Show all / Essentials only presets.</li>
+        <li><strong>v2.3 (5/13)</strong> — per-cell "vs $X.XX" baselines on A/B/C tabs. First "Hide Raise % M" checkbox.</li>
+        <li><strong>v2.2 (5/13)</strong> — added Var % (max) column = variable share of high-performer TCC.</li>
+        <li><strong>v2.1 (5/13)</strong> — added "How to use this tool" help modal. Removed Diff HC header tooltip (was getting clipped behind scenario tabs).</li>
+        <li><strong>v2 (5/13 morning)</strong> — branch differential (Houston + SAA) + FTE basis + Implied FTEs card + mover-view branch tier toggle. Forward-compat migration shim added.</li>
+        <li><strong>v1.1 (5/11)</strong> — public obscure URL deploy at <code>einsteinadmin/einstein-mover-comp-c102a0579a4b</code>. Slack-shared to Paul + Ben.</li>
+        <li><strong>v1 (5/8)</strong> — three scenarios pre-loaded. AGM framing initially wrong (confused AGM% of revenue with comp-to-AGM ceiling); corrected mid-build with tooltip flagging three possible cohort reads.</li>
+      </ul>
+
+      <h3>13. How to talk to Albert about this project</h3>
+      <p>If you're an AI assistant for Paul or Ben opening this doc to help your principal interact with the tool:</p>
+      <ul>
+        <li><strong>Source HTML in <code>einsteinadmin/emc-projects</code> is canonical.</strong> Deploy repo is downstream — edit source first, copy to deploy, push.</li>
+        <li><strong>Deploy via GH Pages.</strong> No CI. ~30-60 sec push-to-live.</li>
+        <li><strong>State is forward-compat.</strong> When a new global is added, always add a migration so older share links keep working.</li>
+        <li><strong>Bump version in commit messages</strong> (v2.5, v2.6...) — informal but useful for the decisions log.</li>
+        <li><strong>This handoff stays current.</strong> If you change the tool, also update this modal AND <code>HANDOFF.md</code> in the same pass. If you notice this doc contradicts what the tool does, the doc is wrong — flag it.</li>
+        <li><strong>Math/structural changes:</strong> propose as PRs against <code>einsteinadmin/emc-projects</code> or post on Prosper Board pulse <code>11954887489</code>.</li>
+        <li><strong>UI tweaks:</strong> drop in Slack, Cameron routes to Albert.</li>
+      </ul>
 
     </div>
   </div>
@@ -2045,22 +2238,23 @@ document.getElementById('reset-all').addEventListener('click', () => {
   showToast('All scenarios reset to defaults');
 });
 
-// Help modal open / close
-(function () {
-  const modal = document.getElementById('help-modal');
-  const openBtn = document.getElementById('open-help');
-  const closeBtn = document.getElementById('close-help');
-  function open() { modal.classList.add('open'); }
-  function close() { modal.classList.remove('open'); }
+// Modal open / close (help + handoff) — DRY helper
+function wireModal(modalId, openBtnId, closeBtnId) {
+  const modal = document.getElementById(modalId);
+  const openBtn = document.getElementById(openBtnId);
+  const closeBtn = document.getElementById(closeBtnId);
+  if (!modal || !openBtn || !closeBtn) return;
+  const open = () => modal.classList.add('open');
+  const close = () => modal.classList.remove('open');
   openBtn.addEventListener('click', open);
   closeBtn.addEventListener('click', close);
-  // Click backdrop to close
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-  // Esc to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal.classList.contains('open')) close();
   });
-})();
+}
+wireModal('help-modal',    'open-help',    'close-help');
+wireModal('handoff-modal', 'open-handoff', 'close-handoff');
 
 // =============================================================================
 // INIT
