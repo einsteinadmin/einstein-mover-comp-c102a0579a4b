@@ -248,7 +248,8 @@
   table.matrix.hide-col-deltaLow  .col-deltaLow,
   table.matrix.hide-col-deltaMed  .col-deltaMed,
   table.matrix.hide-col-deltaMax  .col-deltaMax,
-  table.matrix.hide-col-avgPerHr  .col-avgPerHr { display: none; }
+  table.matrix.hide-col-avgPerHr  .col-avgPerHr,
+  table.matrix.hide-col-trueCost  .col-trueCost { display: none; }
 
   /* Columns picker (popover) */
   .col-picker { position: relative; display: inline-block; }
@@ -748,11 +749,23 @@
       </div>
       <div class="input-block">
         <label>Mover Comp ÷ Revenue Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
-          <strong>Mover-only affordability check.</strong> Industry typical is 30–40% of revenue for mover wages. Default 40%.<br/><br/>
+          <strong>Mover-only affordability check.</strong> Industry typical is 30–40% of revenue for mover wages. Default 40%. Compared against <em>unloaded</em> wages (no burden). See "Benefits & burden %" for loaded-cost view.<br/><br/>
           Applies tone to the "Mover Affordability" card — green comfortably under, warn approaching, red over.
         </span></span></label>
         <input type="number" id="ceilingPct" value="40" step="0.5" />
         <span class="hint">Mover wages ÷ revenue. Default 40%.</span>
+      </div>
+      <div class="input-block">
+        <label>Benefits & burden % <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>True-cost multiplier on top of wages.</strong> Captures employer-side costs that aren't in base or variable pay:<br/><br/>
+          <span class="tip-flag">•</span> FICA employer match (7.65%)<br/>
+          <span class="tip-flag">•</span> FUTA + SUTA unemployment (~1–4%)<br/>
+          <span class="tip-flag">•</span> Workers comp insurance (high for movers — 4–8%)<br/>
+          <span class="tip-flag">•</span> 401k match, benefits, paid training (variable)<br/><br/>
+          Default 20%. Confirm actual rate with Ben / Prosper. Applies to base + variable identically.
+        </span></span></label>
+        <input type="number" id="burdenPct" value="20" step="0.5" />
+        <span class="hint">Loaded-cost multiplier. Default 20%.</span>
       </div>
       <div class="input-block">
         <label>Manager + Leadership Comp $ <span class="tip" tabindex="0">?<span class="tip-body">
@@ -861,6 +874,7 @@
             <th class="col-deltaMax">Δ $/hr (max)</th>
             <th class="col-avgPerHr">Avg $/hr</th>
             <th>Annual Cost</th>
+            <th class="col-trueCost">True Annual Cost</th>
           </tr>
         </thead>
         <tbody id="matrix-body"></tbody>
@@ -883,6 +897,7 @@
             <td class="col-deltaMax"></td>
             <td id="foot-avg" class="col-avgPerHr"></td>
             <td id="foot-total"></td>
+            <td id="foot-true" class="col-trueCost"></td>
           </tr>
         </tfoot>
       </table>
@@ -914,6 +929,7 @@
             <label><input type="checkbox" data-col="deltaMed" /> Δ $/hr (med)</label>
             <label><input type="checkbox" data-col="deltaMax" /> Δ $/hr (max)</label>
             <label><input type="checkbox" data-col="avgPerHr" /> Avg $/hr</label>
+            <label><input type="checkbox" data-col="trueCost" /> True Annual Cost</label>
           </div>
           <div class="actions">
             <a id="cols-show-all">Show all</a>
@@ -1102,7 +1118,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.9).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.0).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1165,6 +1181,7 @@
         <li><code>otherComp</code> · $0 · manager + leadership comp (gates Manager Affordability module)</li>
         <li><code>ceilingPct</code> · 40% · Mover Comp ÷ Revenue ceiling</li>
         <li><code>mgmtCeilingPct</code> · 16% · Manager Comp ÷ AGM ceiling (philosophy doc)</li>
+        <li><code>burdenPct</code> · 20% · Benefits & burden multiplier (FICA + WC + benefits above wages). Drives True Annual Cost.</li>
         <li><code>fteBasis</code> · 2,080 · hrs/yr per FTE for Implied FTEs card</li>
         <li><code>branchDiff</code> · −$1.00 · Houston + SAA base differential</li>
         <li><code>bulkDiffPct</code> · 20% · helper for "Apply to all positions" Diff HC bulk-fill</li>
@@ -1217,7 +1234,7 @@
         <li>Add <code>&lt;th&gt;</code> to the <code>&lt;thead&gt;</code> row. Include <code>class="col-&lt;name&gt;"</code> if hideable</li>
         <li>In <code>renderMatrix()</code>'s <code>tr.innerHTML</code> template, add a <code>&lt;td&gt;</code> in the right position</li>
         <li>If hideable: add <code>col-&lt;name&gt;</code> to the <code>&lt;td&gt;</code>, add to <code>HIDEABLE_COLS</code> constant, add checkbox in Columns popover, add CSS rule <code>table.matrix.hide-col-&lt;name&gt; .col-&lt;name&gt; { display: none; }</code></li>
-        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 18)</li>
+        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 19)</li>
         <li>Add to CSV export header + per-row values</li>
       </ol>
 
@@ -1259,6 +1276,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.0 (5/13)</strong> — Added <strong>Benefits & burden %</strong> global multiplier (default 20%) capturing employer-side costs above wages (FICA, FUTA/SUTA, workers comp, benefits). New "True Annual Cost" column at end of position matrix. New "True Total Mover Cost" card in Mover Affordability module. New "True Mover Cost ÷ Revenue" card in Combined module. Existing Mover Comp ÷ Revenue ceiling (40%) remains on UNLOADED wages (industry standard); burden gives the parallel loaded-cost view. "Essentials only" preset updated to Cameron's spec: Headcount · Base · Var Max · TCC High · Raise % H · Δ/hr max · Annual Cost.</li>
         <li><strong>v2.9 (5/13)</strong> — Added "Δ $/hr (low)" and "Δ $/hr (med)" columns alongside the existing (max). Three-tier dollar-delta view of any scenario vs Current. Default visible; "Essentials only" preset hides low + med (keeps max). All three in CSV export. Group-divider colspan now 18.</li>
         <li><strong>v2.8 (5/13)</strong> — Added "Δ $/hr (max)" column to position matrix: absolute $/hr increase vs Current TCC at high-performance (max variable). Hideable, in CSV export. Sits between Raise % H and Avg $/hr.</li>
         <li><strong>v2.7.2 (5/13)</strong> — Fully hardened state migration: missing UI fields (moverPosition, hiddenCols) and invalid moverPosition references both fall back to defaults. Previous v2.7.1 fixed missing positions only.</li>
@@ -1324,6 +1342,7 @@ function defaultState() {
       otherComp: 0,
       ceilingPct: 40,
       mgmtCeilingPct: 16,
+      burdenPct: 20,
       fteBasis: 2080,
       branchDiff: -1.00,
       bulkDiffPct: 20,
@@ -1366,11 +1385,11 @@ function defaultState() {
       tccLow: false, tccMed: false, tccHigh: false, varPct: false,
       raiseL: false, raiseM: false, raiseH: false,
       deltaLow: false, deltaMed: false, deltaMax: false,
-      avgPerHr: false,
+      avgPerHr: false, trueCost: false,
     },
   };
 }
-const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr'];
+const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','trueCost'];
 
 // Forward-compat shim — fill in fields added after a state was saved/shared
 function migrateState(s) {
@@ -1391,6 +1410,7 @@ function migrateState(s) {
     }
   }
   if (s.globals.otherComp === undefined) s.globals.otherComp = 0;
+  if (s.globals.burdenPct === undefined) s.globals.burdenPct = def.globals.burdenPct;
   // diffHc per position
   Object.keys(s.positions).forEach(posId => {
     if (s.positions[posId].diffHc === undefined) {
@@ -1591,6 +1611,7 @@ function renderGlobals() {
   document.getElementById('otherComp').value = state.globals.otherComp || 0;
   document.getElementById('ceilingPct').value = state.globals.ceilingPct;
   document.getElementById('mgmtCeilingPct').value = state.globals.mgmtCeilingPct;
+  document.getElementById('burdenPct').value = state.globals.burdenPct ?? 20;
   document.getElementById('fteBasis').value = state.globals.fteBasis || 2080;
   document.getElementById('branchDiff').value = (state.globals.branchDiff !== undefined ? state.globals.branchDiff : -1.00);
   document.getElementById('bulkDiffPct').value = state.globals.bulkDiffPct !== undefined ? state.globals.bulkDiffPct : 20;
@@ -1650,7 +1671,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="18">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="19">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -1708,6 +1729,7 @@ function renderMatrix() {
       ${deltaCell('high', 'col-deltaMax')}
       <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}</td>
       <td>${fmt$(r.annualCost)}</td>
+      <td class="col-trueCost">${fmt$(r.annualCost * (1 + (state.globals.burdenPct || 0) / 100))}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -1745,6 +1767,8 @@ function renderMatrix() {
   document.getElementById('foot-diff-hc').textContent = tot.totalDiffHc;
   document.getElementById('foot-avg').textContent = fmt$2(tot.avgPerHr);
   document.getElementById('foot-total').textContent = fmt$(tot.totalCost);
+  const burdMult = 1 + (state.globals.burdenPct || 0) / 100;
+  document.getElementById('foot-true').textContent = fmt$(tot.totalCost * burdMult);
 }
 
 function renderAggregate() {
@@ -1774,11 +1798,20 @@ function renderAggregate() {
     : 'OVER by ' + (v - ceil).toFixed(2) + 'pp';
 
   // ---------- Module 1: Mover Affordability ----------
+  const burdMult = 1 + (state.globals.burdenPct || 0) / 100;
+  const trueMoverCost = cmp.totalCost * burdMult;
+  const curTrueMoverCost = cur.totalCost * burdMult;
+  const deltaTrueCost = trueMoverCost - curTrueMoverCost;
   document.getElementById('cards-mover').innerHTML = `
     <div class="stat">
-      <div class="label">Total Annual Mover Comp</div>
+      <div class="label">Total Annual Mover Comp <span style="font-size:10px;font-weight:400;opacity:0.7">wages only</span></div>
       <div class="big">${fmtM(cmp.totalCost)}</div>
       <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaCost) + ' / ' + (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(2) + '% vs current'}</div>
+    </div>
+    <div class="stat">
+      <div class="label">True Total Mover Cost <span style="font-size:10px;font-weight:400;opacity:0.7">+${state.globals.burdenPct || 0}% burden</span></div>
+      <div class="big">${fmtM(trueMoverCost)}</div>
+      <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaTrueCost) + ' vs current (loaded)'}</div>
     </div>
     <div class="stat ${moverTone}">
       <div class="label">Mover Comp ÷ Revenue</div>
@@ -1849,11 +1882,17 @@ function renderAggregate() {
   const totalCompAgm = cmp.totalCompToAgm;
   const revPerHead = cmp.totalHeadcount > 0 ? cmp.revenue / cmp.totalHeadcount : 0;
   const revPerFte  = cmp.impliedFtes > 0 ? cmp.revenue / cmp.impliedFtes : 0;
+  const trueMoverPctRev = cmp.revenue > 0 ? (trueMoverCost / cmp.revenue) * 100 : 0;
   document.getElementById('cards-combined').innerHTML = `
+    <div class="stat placeholder">
+      <div class="label">True Mover Cost ÷ Revenue <span style="font-size:10px;font-weight:400;opacity:0.7">+${state.globals.burdenPct || 0}% burden</span></div>
+      <div class="big">${fmtPct(trueMoverPctRev)}</div>
+      <div class="delta">Loaded mover cost as % of top line</div>
+    </div>
     <div class="stat placeholder">
       <div class="label">Total All-In Comp</div>
       <div class="big">${fmtM(totalAllComp)}</div>
-      <div class="delta">Movers ${fmtM(cmp.totalCost)} + Mgmt ${fmtM(cmp.otherComp || 0)}</div>
+      <div class="delta">Movers ${fmtM(cmp.totalCost)} + Mgmt ${fmtM(cmp.otherComp || 0)} <em>(wages, not loaded)</em></div>
     </div>
     <div class="stat placeholder">
       <div class="label">Total Comp ÷ Revenue</div>
@@ -2064,7 +2103,7 @@ function renderAll() {
 // =============================================================================
 
 // Globals inputs
-const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'mgmtCeilingPct', 'fteBasis', 'branchDiff', 'bulkDiffPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
+const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'mgmtCeilingPct', 'burdenPct', 'fteBasis', 'branchDiff', 'bulkDiffPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
 globalFields.forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input', (e) => {
@@ -2132,9 +2171,11 @@ document.getElementById('apply-bulk-diff').addEventListener('click', () => {
     saveState();
     renderMatrix();
   });
-  // Essentials preset: shows just Base / Var Max / TCC Med / Raise % M / Δ $/hr (max) / Annual Cost
+  // Essentials preset (per Cameron's v3.0 spec): show
+  //   Position · Headcount · Base · Var Max · TCC High · Raise % H · Δ $/hr (max) · Annual Cost
+  // Hide everything else.
   document.getElementById('cols-essentials').addEventListener('click', () => {
-    const hidden = ['headcount','diffHc','hrsPerYr','tccLow','tccHigh','varPct','raiseL','raiseH','deltaLow','deltaMed','avgPerHr'];
+    const hidden = ['diffHc','hrsPerYr','tccLow','tccMed','varPct','raiseL','raiseM','deltaLow','deltaMed','avgPerHr','trueCost'];
     HIDEABLE_COLS.forEach(col => { state.hiddenCols[col] = hidden.includes(col); });
     saveState();
     renderMatrix();
@@ -2176,7 +2217,7 @@ document.getElementById('mover-branch').addEventListener('change', e => {
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','True Annual Cost (+burden)','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
   POSITIONS.forEach(p => {
     const curR = calcPosition(p.id, 'current');
     SCENARIOS.forEach(s => {
@@ -2188,13 +2229,14 @@ document.getElementById('export-csv').addEventListener('click', () => {
       const deltaLow = s === 'current' ? 0 : (r.tccLow - curR.tccLow);
       const deltaMed = s === 'current' ? 0 : (r.tccMed - curR.tccMed);
       const deltaMax = s === 'current' ? 0 : (r.tccHigh - curR.tccHigh);
+      const trueCost = r.annualCost * (1 + (state.globals.burdenPct || 0) / 100);
       lines.push([
         p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
         r.base.toFixed(2), r.baseDiff.toFixed(2), r.varMax.toFixed(2),
         r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
         varPct.toFixed(1) + '%',
         r.blendedBase.toFixed(2), r.avgPerHr.toFixed(2),
-        Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost),
+        Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost), Math.round(trueCost),
         s === 'current' ? '' : (rL || 0).toFixed(2),
         s === 'current' ? '' : (rM || 0).toFixed(2),
         s === 'current' ? '' : (rH || 0).toFixed(2),
@@ -2233,6 +2275,7 @@ document.getElementById('export-csv').addEventListener('click', () => {
   lines.push('Manager + Leadership Comp $,' + (state.globals.otherComp || 0) + ',,,,,,,,,,,,,,,');
   lines.push('Mover Comp ÷ Revenue Ceiling %,' + state.globals.ceilingPct + ',,,,,,,,,,,,,,,');
   lines.push('Manager Comp ÷ AGM Ceiling %,' + state.globals.mgmtCeilingPct + ',,,,,,,,,,,,,,,');
+  lines.push('Benefits & Burden %,' + (state.globals.burdenPct || 0) + ',,,,,,,,,,,,,,,');
   lines.push('FTE Basis (hrs/yr),' + (state.globals.fteBasis || 2080) + ',,,,,,,,,,,,,,,');
   lines.push('Branch Differential $/hr (Houston + SAA),' + (state.globals.branchDiff || 0).toFixed(2) + ',,,,,,,,,,,,,,,');
   lines.push('Dist L/M/H %,' + state.globals.distLow + '/' + state.globals.distMed + '/' + state.globals.distHigh + ',,,,,,,,,,,,,,,');
