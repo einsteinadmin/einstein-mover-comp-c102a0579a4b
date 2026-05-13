@@ -1090,7 +1090,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.5).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.7).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1124,9 +1124,10 @@
       <p><strong>Calc.</strong> Two pure functions: <code>calcPosition(posId, scenario)</code> returns per-position economics. <code>calcScenarioTotals(scenario)</code> rolls up to company totals. No state mutation — easy to reason about.</p>
 
       <h3>5. Data model — positions, scenarios, globals</h3>
-      <p><strong>Seven positions</strong> in display order (id · name · group · default base · default var max):</p>
+      <p><strong>Eight positions</strong> in display order (id · name · group · default base · default var max):</p>
       <ul>
-        <li><code>copilot</code> · Co-Pilot · entry · $18.00 · $1.50</li>
+        <li><code>copilot</code> · Co-Pilot (Lead In Training) · entry · $18.00 · $1.50</li>
+        <li><code>waiting</code> · Lead in Waiting · lead · $0.00 · $0.00 <em>(new role, zeroed — see note below)</em></li>
         <li><code>jr</code> · Jr. Lead · lead · $19.50 · $1.75</li>
         <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
         <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
@@ -1134,7 +1135,8 @@
         <li><code>general</code> · Lead General · lead · $20.50 · $3.75</li>
         <li><code>hof</code> · HOF (legacy) · legacy · $21.68 · $1.75</li>
       </ul>
-      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: Co-Pilot 1,700 (PT-heavy entry); leads 1,900.</p>
+      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 0 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: Co-Pilot 1,700 (PT-heavy entry); leads 1,900.</p>
+      <p><strong>Lead in Waiting</strong> is a forward-looking placeholder for a new role between Co-Pilot and Jr. Lead. Zeroed across all four scenarios in v2.7 — fill in base/var/headcount when the role is defined and we want to model its cost.</p>
 
       <p><strong>Three scenarios:</strong></p>
       <ul>
@@ -1245,6 +1247,8 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v2.7 (5/13)</strong> — Renamed Co-Pilot → "Co-Pilot (Lead In Training)". Added new "Lead in Waiting" position between Co-Pilot and Jr. Lead, zeroed across all scenarios (headcount 0, base 0, var 0). Forward-looking placeholder for a role that doesn't yet exist.</li>
+        <li><strong>v2.6 (5/13)</strong> — Embedded handoff doc as in-tool modal (🔧 button in header) so it travels with the tool URL. Mirror copy in HANDOFF.md flagged for parallel maintenance.</li>
         <li><strong>v2.5 (5/13)</strong> — biggest framing change. Replaced single "Comp-to-AGM" ceiling with two distinct ceilings: Mover Comp ÷ Revenue (40%) and Manager Comp ÷ AGM (16%). Restructured Aggregate into three modules — Mover, Manager (gated on otherComp), Combined (placeholder). Added sticky Position column. Embedded handoff modal added.</li>
         <li><strong>v2.4 (5/13)</strong> — extended single-column hide to full Columns picker popover (11 hideable, 4 always-visible) with Show all / Essentials only presets.</li>
         <li><strong>v2.3 (5/13)</strong> — per-cell "vs $X.XX" baselines on A/B/C tabs. First "Hide Raise % M" checkbox.</li>
@@ -1279,7 +1283,8 @@
 // DATA
 // =============================================================================
 const POSITIONS = [
-  { id: 'copilot', name: 'Co-Pilot',     base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
+  { id: 'copilot', name: 'Co-Pilot (Lead In Training)', base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
+  { id: 'waiting', name: 'Lead in Waiting', base: 0.00,  varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'lead'   },
   { id: 'jr',      name: 'Jr. Lead',     base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
   { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
   { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
@@ -1314,6 +1319,9 @@ function defaultState() {
       copilot: { headcount: 147, diffHc: 29, hrsPerYr: 1700,
         base:   { current: 18.00, A: 20.00, B: 20.00, C: 18.00 },
         varMax: { current: 1.50,  A: 0.00,  B: 1.50,  C: 1.50  } },
+      waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1900,
+        base:   { current: 0.00, A: 0.00, B: 0.00, C: 0.00 },
+        varMax: { current: 0.00, A: 0.00, B: 0.00, C: 0.00 } },
       jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1900,
         base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
         varMax: { current: 1.75,  A: 2.25,  B: 2.25,  C: 1.75  } },
