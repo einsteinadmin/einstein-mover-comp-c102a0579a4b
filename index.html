@@ -211,6 +211,29 @@
     color: var(--muted);
     background: #F8F8F8;
   }
+  table.matrix td .cell-baseline {
+    display: block;
+    font-size: 10.5px;
+    color: #9A9A9A;
+    text-align: right;
+    margin-top: 2px;
+    padding-right: 6px;
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  table.matrix.hide-raise-m .col-raise-m { display: none; }
+  .col-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    user-select: none;
+  }
+  .col-toggle input { margin: 0; cursor: pointer; }
   table.matrix .pos-name {
     font-weight: 600;
     color: var(--ink);
@@ -700,7 +723,7 @@
             <th>TCC High</th>
             <th>Var % (max)</th>
             <th>Raise % L</th>
-            <th>Raise % M</th>
+            <th class="col-raise-m">Raise % M</th>
             <th>Raise % H</th>
             <th>Avg $/hr</th>
             <th>Annual Cost</th>
@@ -723,6 +746,7 @@
       <span><span class="sw" style="background:#EAF6EE;border:1px solid #B7D9C2"></span> raise %</span>
       <span><span class="sw" style="background:#FBEAE9;border:1px solid #EBB8B4"></span> cut %</span>
       <span>"Raise %" = vs current Total Cash Comp at same performance level (apples-to-apples).</span>
+      <label class="col-toggle"><input type="checkbox" id="toggle-raise-m" /> Hide Raise % M column</label>
     </div>
   </section>
 
@@ -953,6 +977,7 @@ function defaultState() {
     moverScenario: 'A',
     moverTips: '5,8',
     moverBranch: 'std',
+    hideRaiseM: false,
   };
 }
 
@@ -1176,6 +1201,12 @@ function renderMatrix() {
   const sce = activeScenario();
   const isLocked = sce === 'current';
 
+  // Apply hide-raise-m toggle to the table + sync checkbox
+  const tableEl = document.getElementById('matrix');
+  tableEl.classList.toggle('hide-raise-m', !!state.hideRaiseM);
+  const tg = document.getElementById('toggle-raise-m');
+  if (tg) tg.checked = !!state.hideRaiseM;
+
   let lastGroup = null;
   POSITIONS.forEach(p => {
     if (p.group !== lastGroup) {
@@ -1193,13 +1224,19 @@ function renderMatrix() {
     const rH = calcRaisePct(p.id, sce, 'high');
     const ps = state.positions[p.id];
 
-    const raiseCell = (val) => {
-      if (val === null) return '<td class="delta-zero">—</td>';
-      if (sce === 'current') return '<td class="delta-zero">—</td>';
+    const raiseCell = (val, extraCls) => {
+      const extra = extraCls ? ' ' + extraCls : '';
+      if (val === null) return `<td class="delta-zero${extra}">—</td>`;
+      if (sce === 'current') return `<td class="delta-zero${extra}">—</td>`;
       const cls = val > 0.005 ? 'delta-pos' : val < -0.005 ? 'delta-neg' : 'delta-zero';
       const sign = val > 0 ? '+' : '';
-      return `<td class="${cls}">${sign}${val.toFixed(2)}%</td>`;
+      return `<td class="${cls}${extra}">${sign}${val.toFixed(2)}%</td>`;
     };
+
+    // Baseline (Current scenario) values for inline comparison on A/B/C tabs
+    const cur = sce === 'current' ? null : calcPosition(p.id, 'current');
+    const baseBaseline = cur ? `<div class="cell-baseline">vs $${cur.base.toFixed(2)}</div>` : '';
+    const varBaseline  = cur ? `<div class="cell-baseline">vs $${cur.varMax.toFixed(2)}</div>` : '';
 
     const ro = isLocked ? 'readonly' : '';
     const roCls = isLocked ? ' readonly' : '';
@@ -1209,14 +1246,14 @@ function renderMatrix() {
       <td><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
-      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/></td>
-      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/></td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/>${baseBaseline}</td>
+      <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/>${varBaseline}</td>
       <td>${fmt$2(r.tccLow)}</td>
       <td>${fmt$2(r.tccMed)}</td>
       <td>${fmt$2(r.tccHigh)}</td>
       <td>${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}</td>
       ${raiseCell(rL)}
-      ${raiseCell(rM)}
+      ${raiseCell(rM, 'col-raise-m')}
       ${raiseCell(rH)}
       <td>${fmt$2(r.avgPerHr)}</td>
       <td>${fmt$(r.annualCost)}</td>
@@ -1527,6 +1564,13 @@ document.getElementById('apply-bulk-diff').addEventListener('click', () => {
   saveState();
   renderAll();
   showToast('Diff HC seeded at ' + state.globals.bulkDiffPct + '% across all positions');
+});
+
+// Hide Raise % M toggle
+document.getElementById('toggle-raise-m').addEventListener('change', (e) => {
+  state.hideRaiseM = e.target.checked;
+  saveState();
+  document.getElementById('matrix').classList.toggle('hide-raise-m', state.hideRaiseM);
 });
 
 // Tabs
