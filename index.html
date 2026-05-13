@@ -1242,12 +1242,13 @@
         <li><strong>Variable comp assumes multiplier model</strong> — fixed % of max per tier. If we shift to continuous scorecard-driven variable, the dist + mult model gets replaced.</li>
         <li><strong>Combined / All-In is intentionally placeholder.</strong> Five metrics are working but the right set is TBD.</li>
         <li><strong>No undo inside the tool.</strong> Resetting all scenarios wipes prior state. Use share links to snapshot, or "Copy JSON" before reset.</li>
-        <li><strong>State migration handles missing fields, not missing positions.</strong> If localStorage is manually corrupted to drop a position, <code>calcPosition</code> throws. Real users won't hit this.</li>
+        <li><strong>State migration is robust as of v2.7.2.</strong> Missing globals, missing positions, and missing UI-state fields all fall back to defaults. Truly corrupted JSON in localStorage still requires a hard reset.</li>
       </ul>
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
-        <li><strong>v2.7 (5/13)</strong> — Renamed Co-Pilot → "Co-Pilot (Lead In Training)". Added new "Lead in Waiting" position between Co-Pilot and Jr. Lead, zeroed across all scenarios (headcount 0, base 0, var 0). Forward-looking placeholder for a role that doesn't yet exist.</li>
+        <li><strong>v2.7.2 (5/13)</strong> — Fully hardened state migration: missing UI fields (moverPosition, hiddenCols) and invalid moverPosition references both fall back to defaults. Previous v2.7.1 fixed missing positions only.</li>
+        <li><strong>v2.7 (5/13)</strong> — Renamed Co-Pilot → "Co-Pilot (Lead In Training)". Added new "Lead in Waiting" position between Co-Pilot and Jr. Lead, zeroed across all scenarios (headcount 0, base 0, var 0). Forward-looking placeholder for a role that doesn't yet exist. <em>v2.7.1 hot-fix: migration shim for missing positions to prevent crash from older localStorage.</em></li>
         <li><strong>v2.6 (5/13)</strong> — Embedded handoff doc as in-tool modal (🔧 button in header) so it travels with the tool URL. Mirror copy in HANDOFF.md flagged for parallel maintenance.</li>
         <li><strong>v2.5 (5/13)</strong> — biggest framing change. Replaced single "Comp-to-AGM" ceiling with two distinct ceilings: Mover Comp ÷ Revenue (40%) and Manager Comp ÷ AGM (16%). Restructured Aggregate into three modules — Mover, Manager (gated on otherComp), Combined (placeholder). Added sticky Position column. Embedded handoff modal added.</li>
         <li><strong>v2.4 (5/13)</strong> — extended single-column hide to full Columns picker popover (11 hideable, 4 always-visible) with Show all / Essentials only presets.</li>
