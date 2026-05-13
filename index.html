@@ -245,6 +245,8 @@
   table.matrix.hide-col-raiseL    .col-raiseL,
   table.matrix.hide-col-raiseM    .col-raiseM,
   table.matrix.hide-col-raiseH    .col-raiseH,
+  table.matrix.hide-col-deltaLow  .col-deltaLow,
+  table.matrix.hide-col-deltaMed  .col-deltaMed,
   table.matrix.hide-col-deltaMax  .col-deltaMax,
   table.matrix.hide-col-avgPerHr  .col-avgPerHr { display: none; }
 
@@ -854,6 +856,8 @@
             <th class="col-raiseL">Raise % L</th>
             <th class="col-raiseM">Raise % M</th>
             <th class="col-raiseH">Raise % H</th>
+            <th class="col-deltaLow">Δ $/hr (low)</th>
+            <th class="col-deltaMed">Δ $/hr (med)</th>
             <th class="col-deltaMax">Δ $/hr (max)</th>
             <th class="col-avgPerHr">Avg $/hr</th>
             <th>Annual Cost</th>
@@ -874,6 +878,8 @@
             <td class="col-raiseL"></td>
             <td class="col-raiseM"></td>
             <td class="col-raiseH"></td>
+            <td class="col-deltaLow"></td>
+            <td class="col-deltaMed"></td>
             <td class="col-deltaMax"></td>
             <td id="foot-avg" class="col-avgPerHr"></td>
             <td id="foot-total"></td>
@@ -904,6 +910,8 @@
             <label><input type="checkbox" data-col="raiseL" /> Raise % L</label>
             <label><input type="checkbox" data-col="raiseM" /> Raise % M</label>
             <label><input type="checkbox" data-col="raiseH" /> Raise % H</label>
+            <label><input type="checkbox" data-col="deltaLow" /> Δ $/hr (low)</label>
+            <label><input type="checkbox" data-col="deltaMed" /> Δ $/hr (med)</label>
             <label><input type="checkbox" data-col="deltaMax" /> Δ $/hr (max)</label>
             <label><input type="checkbox" data-col="avgPerHr" /> Avg $/hr</label>
           </div>
@@ -1094,7 +1102,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.8).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v2.9).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1209,7 +1217,7 @@
         <li>Add <code>&lt;th&gt;</code> to the <code>&lt;thead&gt;</code> row. Include <code>class="col-&lt;name&gt;"</code> if hideable</li>
         <li>In <code>renderMatrix()</code>'s <code>tr.innerHTML</code> template, add a <code>&lt;td&gt;</code> in the right position</li>
         <li>If hideable: add <code>col-&lt;name&gt;</code> to the <code>&lt;td&gt;</code>, add to <code>HIDEABLE_COLS</code> constant, add checkbox in Columns popover, add CSS rule <code>table.matrix.hide-col-&lt;name&gt; .col-&lt;name&gt; { display: none; }</code></li>
-        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 16)</li>
+        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 18)</li>
         <li>Add to CSV export header + per-row values</li>
       </ol>
 
@@ -1251,6 +1259,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v2.9 (5/13)</strong> — Added "Δ $/hr (low)" and "Δ $/hr (med)" columns alongside the existing (max). Three-tier dollar-delta view of any scenario vs Current. Default visible; "Essentials only" preset hides low + med (keeps max). All three in CSV export. Group-divider colspan now 18.</li>
         <li><strong>v2.8 (5/13)</strong> — Added "Δ $/hr (max)" column to position matrix: absolute $/hr increase vs Current TCC at high-performance (max variable). Hideable, in CSV export. Sits between Raise % H and Avg $/hr.</li>
         <li><strong>v2.7.2 (5/13)</strong> — Fully hardened state migration: missing UI fields (moverPosition, hiddenCols) and invalid moverPosition references both fall back to defaults. Previous v2.7.1 fixed missing positions only.</li>
         <li><strong>v2.7 (5/13)</strong> — Renamed Co-Pilot → "Co-Pilot (Lead In Training)". Added new "Lead in Waiting" position between Co-Pilot and Jr. Lead, zeroed across all scenarios (headcount 0, base 0, var 0). Forward-looking placeholder for a role that doesn't yet exist. <em>v2.7.1 hot-fix: migration shim for missing positions to prevent crash from older localStorage.</em></li>
@@ -1355,11 +1364,13 @@ function defaultState() {
     hiddenCols: {
       headcount: false, diffHc: false, hrsPerYr: false,
       tccLow: false, tccMed: false, tccHigh: false, varPct: false,
-      raiseL: false, raiseM: false, raiseH: false, deltaMax: false, avgPerHr: false,
+      raiseL: false, raiseM: false, raiseH: false,
+      deltaLow: false, deltaMed: false, deltaMax: false,
+      avgPerHr: false,
     },
   };
 }
-const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaMax','avgPerHr'];
+const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr'];
 
 // Forward-compat shim — fill in fields added after a state was saved/shared
 function migrateState(s) {
@@ -1639,7 +1650,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="16">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="18">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -1663,14 +1674,16 @@ function renderMatrix() {
     const baseBaseline = cur ? `<div class="cell-baseline">vs $${cur.base.toFixed(2)}</div>` : '';
     const varBaseline  = cur ? `<div class="cell-baseline">vs $${cur.varMax.toFixed(2)}</div>` : '';
 
-    // Δ $/hr at max-variable assumption: scenario TCC High − current TCC High
-    const deltaMaxCell = () => {
-      if (sce === 'current' || !cur) return '<td class="col-deltaMax delta-zero">—</td>';
-      const d = r.tccHigh - cur.tccHigh;
-      if (Math.abs(d) < 0.005) return '<td class="col-deltaMax delta-zero">$0.00</td>';
+    // Δ $/hr at a given tier (low / med / high): scenario TCC − current TCC at that tier
+    const deltaCell = (tier, colClass) => {
+      if (sce === 'current' || !cur) return `<td class="${colClass} delta-zero">—</td>`;
+      const sceT = tier === 'low' ? r.tccLow   : tier === 'med' ? r.tccMed   : r.tccHigh;
+      const curT = tier === 'low' ? cur.tccLow : tier === 'med' ? cur.tccMed : cur.tccHigh;
+      const d = sceT - curT;
+      if (Math.abs(d) < 0.005) return `<td class="${colClass} delta-zero">$0.00</td>`;
       const cls = d > 0 ? 'delta-pos' : 'delta-neg';
       const sign = d > 0 ? '+' : '−';
-      return `<td class="col-deltaMax ${cls}">${sign}$${Math.abs(d).toFixed(2)}</td>`;
+      return `<td class="${colClass} ${cls}">${sign}$${Math.abs(d).toFixed(2)}</td>`;
     };
 
     const ro = isLocked ? 'readonly' : '';
@@ -1690,7 +1703,9 @@ function renderMatrix() {
       ${raiseCell(rL, 'col-raiseL')}
       ${raiseCell(rM, 'col-raiseM')}
       ${raiseCell(rH, 'col-raiseH')}
-      ${deltaMaxCell()}
+      ${deltaCell('low', 'col-deltaLow')}
+      ${deltaCell('med', 'col-deltaMed')}
+      ${deltaCell('high', 'col-deltaMax')}
       <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}</td>
       <td>${fmt$(r.annualCost)}</td>
     `;
@@ -2117,10 +2132,9 @@ document.getElementById('apply-bulk-diff').addEventListener('click', () => {
     saveState();
     renderMatrix();
   });
-  // Essentials preset: hide Headcount, Diff HC, Hrs/yr, TCC Low, TCC High, Var %, Raise % L, Raise % H, Avg $/hr
-  // — shows just Base / Var Max / TCC Med / Raise % M / Annual Cost
+  // Essentials preset: shows just Base / Var Max / TCC Med / Raise % M / Δ $/hr (max) / Annual Cost
   document.getElementById('cols-essentials').addEventListener('click', () => {
-    const hidden = ['headcount','diffHc','hrsPerYr','tccLow','tccHigh','varPct','raiseL','raiseH','avgPerHr'];
+    const hidden = ['headcount','diffHc','hrsPerYr','tccLow','tccHigh','varPct','raiseL','raiseH','deltaLow','deltaMed','avgPerHr'];
     HIDEABLE_COLS.forEach(col => { state.hiddenCols[col] = hidden.includes(col); });
     saveState();
     renderMatrix();
@@ -2162,7 +2176,7 @@ document.getElementById('mover-branch').addEventListener('change', e => {
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H','Δ $/hr at max (vs Current)'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
   POSITIONS.forEach(p => {
     const curR = calcPosition(p.id, 'current');
     SCENARIOS.forEach(s => {
@@ -2171,6 +2185,8 @@ document.getElementById('export-csv').addEventListener('click', () => {
       const rM = calcRaisePct(p.id, s, 'med');
       const rH = calcRaisePct(p.id, s, 'high');
       const varPct = r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100) : 0;
+      const deltaLow = s === 'current' ? 0 : (r.tccLow - curR.tccLow);
+      const deltaMed = s === 'current' ? 0 : (r.tccMed - curR.tccMed);
       const deltaMax = s === 'current' ? 0 : (r.tccHigh - curR.tccHigh);
       lines.push([
         p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
@@ -2182,6 +2198,8 @@ document.getElementById('export-csv').addEventListener('click', () => {
         s === 'current' ? '' : (rL || 0).toFixed(2),
         s === 'current' ? '' : (rM || 0).toFixed(2),
         s === 'current' ? '' : (rH || 0).toFixed(2),
+        s === 'current' ? '' : deltaLow.toFixed(2),
+        s === 'current' ? '' : deltaMed.toFixed(2),
         s === 'current' ? '' : deltaMax.toFixed(2),
       ].join(','));
     });
