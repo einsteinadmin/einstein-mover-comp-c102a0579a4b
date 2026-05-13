@@ -453,6 +453,99 @@
   .tip .tip-body strong { color: #FFD9A8; }
   .tip-flag { color: #FFD180; font-weight: 700; }
 
+  /* Help modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 15, 0.62);
+    backdrop-filter: blur(3px);
+    z-index: 10000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-panel {
+    background: white;
+    border-radius: 10px;
+    max-width: 820px;
+    width: 100%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: modal-pop 0.18s ease-out;
+  }
+  @keyframes modal-pop {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .modal-head {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-head h2 { margin: 0; font-size: 18px; }
+  .modal-close {
+    background: rgba(255,255,255,0.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.45);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.28); }
+  .modal-body {
+    padding: 22px 26px 28px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  .modal-body h3 {
+    margin: 22px 0 6px;
+    font-size: 14.5px;
+    color: var(--orange-dark);
+    letter-spacing: -0.005em;
+  }
+  .modal-body h3:first-child { margin-top: 0; }
+  .modal-body p { margin: 0 0 10px; }
+  .modal-body ul { margin: 4px 0 12px; padding-left: 22px; }
+  .modal-body li { margin: 4px 0; }
+  .modal-body code {
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+  }
+  .modal-body strong { color: var(--ink); }
+  .modal-body .callout {
+    background: #FFF7EC;
+    border-left: 3px solid var(--orange);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0 14px;
+    font-size: 13px;
+  }
+  .modal-body .scenario-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 6px 0;
+  }
+  .modal-body .scenario-card strong { color: var(--orange-dark); }
+
   @media (max-width: 760px) {
     main { padding: 0 16px 40px; }
     header { padding: 18px 16px; }
@@ -463,8 +556,13 @@
 </head>
 <body>
 <header>
-  <h1>Mover Compensation Scenario Modeler</h1>
-  <p>Toggle base + variable per position. See live impact on annual mover comp, gross margin, and what the announcement looks like to a mover at each tenure tier. Three scenarios you can flip between — A, B, C — plus the locked Current state.</p>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:280px;">
+      <h1>Mover Compensation Scenario Modeler</h1>
+      <p>Toggle base + variable per position. See live impact on annual mover comp, gross margin, and what the announcement looks like to a mover at each tenure tier. Three scenarios you can flip between — A, B, C — plus the locked Current state.</p>
+    </div>
+    <button id="open-help" style="background:rgba(255,255,255,0.18); color:white; border:1px solid rgba(255,255,255,0.55); border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; backdrop-filter:blur(2px); white-space:nowrap;">📖 How to use this tool</button>
+  </div>
 </header>
 
 <main>
@@ -593,7 +691,7 @@
           <tr>
             <th class="left">Position</th>
             <th>Headcount</th>
-            <th>Diff HC <span class="tip" tabindex="0" style="vertical-align:middle;">?<span class="tip-body"><strong>Houston + SAA headcount at this position.</strong> These movers earn base − differential. Variable is the same as standard branches.</span></span></th>
+            <th>Diff HC</th>
             <th>Hrs/yr</th>
             <th>Base $/hr</th>
             <th>Var Max $/hr</th>
@@ -714,6 +812,77 @@
       <span style="opacity:0.85; font-size:12.5px;" id="share-banner-source">Someone shared this view with you. Your previous work is preserved — click Dismiss to keep this, or "Reset all scenarios" to start fresh.</span>
     </div>
     <button id="share-banner-dismiss" style="background:transparent; color:white; border:1px solid rgba(255,255,255,0.3); border-radius:4px; padding:4px 8px; font-size:12px; cursor:pointer; flex-shrink:0;">Dismiss</button>
+  </div>
+</div>
+
+<!-- Help modal — opened from header button -->
+<div id="help-modal" class="modal-backdrop" role="dialog" aria-labelledby="help-title" aria-modal="true">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h2 id="help-title">📖 How to use this tool</h2>
+      <button class="modal-close" id="close-help">Close ✕</button>
+    </div>
+    <div class="modal-body">
+
+      <h3>What this is</h3>
+      <p>A live scenario modeler for mover pay. Plug in different combinations of base pay and variable pay per position, and see the company-wide cost, the gross-margin impact, and what the announcement looks like to an individual mover. The point isn't to predict the future — it's to make trade-offs visible before we commit to anything.</p>
+
+      <div class="callout"><strong>Three scenarios, one baseline.</strong> Everything is compared against <em>Current</em> (locked, not editable). Scenarios A, B, and C are sandboxes you can edit. Switch between them with the tabs above the position matrix.</div>
+
+      <h3>The three pre-loaded scenarios</h3>
+      <div class="scenario-card"><strong>Scenario A — "Flat $20 Co-Pilot, raises across leads."</strong> Co-Pilot base jumps to $20/hr but loses its variable component (Cameron's hypothesis: simpler entry-level pay attracts more applicants and removes a confusing piece of the offer). All lead positions get base + variable raises. Net impact ≈ +$558K / +6% vs current.</div>
+      <div class="scenario-card"><strong>Scenario B — "$20 Co-Pilot keeping the variable."</strong> Same as A, but Co-Pilots also keep their $1.50/hr variable. Tests Paul's hypothesis that variable still matters at entry-level. Lead raises identical to A. Net impact ≈ +$850K / +9% vs current.</div>
+      <div class="scenario-card"><strong>Scenario C — "No-change baseline."</strong> A copy of Current, editable. Useful when you want to test ONE specific change in isolation without rebuilding from scratch.</div>
+
+      <h3>The position matrix — what each column means</h3>
+      <ul>
+        <li><strong>Headcount</strong> — total people in that position company-wide.</li>
+        <li><strong>Diff HC</strong> — how many of that headcount sit at Houston + San Antonio (see "Branch differential" below).</li>
+        <li><strong>Hrs/yr</strong> — blended average hours per year per person at that position. Should reflect your real FT/PT mix across the full year (summer is heavier, winter lighter — average it).</li>
+        <li><strong>Base $/hr</strong> — what standard branches pay as base. Houston + SAA pay this minus the differential.</li>
+        <li><strong>Var Max $/hr</strong> — the maximum quarterly variable a high performer can earn (same at every branch).</li>
+        <li><strong>TCC Low / Med / High</strong> — Total Cash Comp per hour at each performance tier (base + earned variable).</li>
+        <li><strong>Raise % L / M / H</strong> — how much each tier moves vs Current at the same performance level. Apples-to-apples.</li>
+      </ul>
+
+      <h3>Branch differential (Houston + San Antonio)</h3>
+      <p>Houston and San Antonio pay base $1/hr below the other 8 branches across every position. The variable component is identical company-wide. The "Branch Differential $/hr" global lets you change that delta — set it to <code>0</code> to model a unified pay band, or test <code>-0.50</code> to see what closing half the gap costs.</p>
+      <p>The <strong>Diff HC</strong> column tells the math how many of each position's headcount are at the differential branches. Defaults seed at 20% of each position (rough estimate — 2 of 10 branches). The <strong>"Apply % to all positions"</strong> button lets you bulk-fill all rows at once if you want a different starting estimate.</p>
+      <div class="callout"><strong>Why this matters:</strong> a $1/hr base raise that "feels" cheap costs roughly $90K/year just for the ~50 movers at Houston + SAA, on top of the standard-branch cost. Modeling the two cohorts separately keeps the total honest.</div>
+
+      <h3>Performance distribution & multipliers</h3>
+      <p>The annual cost calc assumes most movers earn the middle tier of variable, not the max. You tell the model two things:</p>
+      <ul>
+        <li><strong>Distribution</strong> — what % of movers we expect to be Low / Medium / High performers. Default 20 / 60 / 20.</li>
+        <li><strong>Variable multipliers</strong> — what % of the max variable each tier actually earns. Default 50% / 80% / 100%.</li>
+      </ul>
+      <p>So a position with $2.00/hr max variable, under defaults, costs roughly <code>0.2×$1.00 + 0.6×$1.60 + 0.2×$2.00 = $1.56/hr</code> in expected variable on average. Adjust to match what your actuals show.</p>
+
+      <h3>FTE basis & Implied FTEs</h3>
+      <p>Raw headcount doesn't tell you what the workload actually is — a part-time mover working 800 hrs/yr counts as "1 head" but is really 0.4 of a full-time-equivalent (at a 2,080 hr basis).</p>
+      <p>The <strong>"Implied FTEs"</strong> card divides total mover-hours by the FTE basis (default 2,080 = 40 hrs × 52 wks). If the number is meaningfully below raw headcount, you've got a heavy PT mix and the per-position Hrs/yr inputs should reflect that blended average.</p>
+      <p><strong>This does not affect cost math.</strong> Cost is driven by <code>Headcount × Hrs/yr × $/hr</code>. The Implied FTE card is a sanity-check so you can spot when Hrs/yr defaults are too high (or too low) for a position.</p>
+
+      <h3>Mover-view preview</h3>
+      <p>The bottom section shows what an individual mover at a given position sees when we announce the new program. Pick the position, scenario, and <strong>branch tier</strong> (Standard vs. Houston/SAA). The annual TCC row is calibrated to that position's Hrs/yr — so it's a realistic year-one earnings projection at low / medium / high performance.</p>
+      <p>Use this to sanity-check that the announcement actually feels like a raise to the mover you're talking to. If the high-performer line moves but the low-performer line is flat, that's worth knowing before you ship.</p>
+
+      <h3>Aggregate impact cards (top right of the Aggregate section)</h3>
+      <ul>
+        <li><strong>Total Annual Mover Comp</strong> — the company-wide annual cost for the active scenario.</li>
+        <li><strong>Mover Comp ÷ Revenue</strong> — current run-rate is ~38–41%. Industry typical 30–40%. The cleanest mover-only affordability metric.</li>
+        <li><strong>Total Comp ÷ AGM</strong> — only useful if you fill in "All Other Annual Comp" (managers + ops + leadership). Compared against the ~16% ceiling from the philosophy doc.</li>
+        <li><strong>Blended Mover $/hr</strong> — total cost ÷ total mover-hours. The "average mover" wage.</li>
+        <li><strong>Implied FTEs</strong> — see above.</li>
+      </ul>
+
+      <h3>Sharing & saving</h3>
+      <p>Use the <strong>📎 Copy share link</strong> button (bottom of page). It packs your full state — all 3 scenarios, every input — into the URL and copies it to your clipboard. Paste in Slack or email and the recipient sees exactly what you see. State also auto-saves to your browser; close the tab and your work comes back.</p>
+
+      <h3>One thing this tool does NOT do</h3>
+      <p>Annual cost is annual — it doesn't model <em>when</em> the cost hits. Summer is heavier (more hours per person) than winter, so a raise effective in May costs more than the same raise effective in November. The annual number is the right number for budgeting; cash-flow timing is a separate conversation.</p>
+
+    </div>
   </div>
 </div>
 
@@ -1508,6 +1677,23 @@ document.getElementById('reset-all').addEventListener('click', () => {
   renderAll();
   showToast('All scenarios reset to defaults');
 });
+
+// Help modal open / close
+(function () {
+  const modal = document.getElementById('help-modal');
+  const openBtn = document.getElementById('open-help');
+  const closeBtn = document.getElementById('close-help');
+  function open() { modal.classList.add('open'); }
+  function close() { modal.classList.remove('open'); }
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  // Click backdrop to close
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+  // Esc to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+})();
 
 // =============================================================================
 // INIT
