@@ -190,7 +190,18 @@
     border-bottom: 2px solid var(--line-strong);
   }
   table.matrix th.left, table.matrix td.left { text-align: left; }
-  table.matrix tbody tr:hover { background: #FAFAF7; }
+  /* Sticky Position column — stays put as you scroll horizontally */
+  table.matrix th.left,
+  table.matrix td.left {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: white;
+    box-shadow: 4px 0 6px -3px rgba(0,0,0,0.08);
+  }
+  table.matrix thead th.left { background: #F4F4F4; z-index: 4; }
+  table.matrix tfoot td.left { background: #F8F8F8; z-index: 3; }
+  table.matrix tbody tr:hover td.left { background: #FAFAF7; }
   table.matrix td .cell-input {
     border: 1px solid transparent;
     background: transparent;
@@ -366,6 +377,39 @@
   .stat.good .label { color: #1E5C32; }
   .stat.bad { background: #FBEAE9; border-color: #EBB8B4; }
   .stat.bad .label { color: #842620; }
+  .stat.placeholder { background: #F8F4FF; border-color: #DCD0F0; border-style: dashed; }
+  .stat.placeholder .label { color: #5B3A8F; }
+
+  /* Aggregate module headings */
+  .agg-module-title {
+    margin: 22px 0 8px;
+    padding: 8px 12px;
+    background: var(--orange-soft);
+    border-left: 4px solid var(--orange);
+    border-radius: 0 6px 6px 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--orange-dark);
+    letter-spacing: -0.005em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .agg-module-title:first-of-type { margin-top: 12px; }
+  .agg-module-title .agg-module-sub {
+    font-size: 11.5px;
+    font-weight: 500;
+    opacity: 0.75;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .agg-module-title.muted {
+    background: #F4F4F4;
+    border-left-color: var(--line-strong);
+    color: var(--muted);
+  }
 
   /* Side-by-side */
   table.sxs {
@@ -688,11 +732,6 @@
         <span class="hint">= Revenue × AGM %</span>
       </div>
       <div class="input-block">
-        <label>All Other Annual Comp $</label>
-        <input type="number" id="otherComp" value="0" step="100000" />
-        <span class="hint">Managers + ops + leadership comp. Lets total-comp ÷ AGM be meaningful.</span>
-      </div>
-      <div class="input-block">
         <label>FTE basis (hrs/yr per FTE) <span class="tip" tabindex="0">?<span class="tip-body">
           <strong>Used for the "Implied FTEs" card only.</strong> Default 2,080 = 40 hrs × 52 wks.<br/><br/>
           Total mover-hours ÷ this number = how many full-time-equivalents that workload represents. If implied FTEs is meaningfully smaller than raw headcount, you've got a heavy part-time mix.<br/><br/>
@@ -702,16 +741,27 @@
         <span class="hint">2,080 = 40 hrs × 52 wks (industry default)</span>
       </div>
       <div class="input-block">
-        <label>Comp-to-AGM Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
-          <strong>Read this before relying on the ceiling card.</strong><br/>
-          The philosophy doc states: <em>"if comp-to-AGM climbs above ~16%, we reassess."</em> But it doesn't fully specify which comp cohort. Three possible reads:<br/><br/>
-          <span class="tip-flag">1.</span> All-employee comp ÷ AGM — likely too broad (mathematically blows past 16% just from mover payroll).<br/>
-          <span class="tip-flag">2.</span> Manager + leadership salaries ÷ AGM — matches the 13.4% YoY figure Ben quoted on 5/11. Probably the right read.<br/>
-          <span class="tip-flag">3.</span> Salaried + bonus-eligible comp pool ÷ AGM — possibility worth checking.<br/><br/>
-          <strong>Action:</strong> confirm with Ben before treating the ceiling card as a hard "go / no-go." For now, the cleanest mover-only affordability metric is <strong>Mover Comp ÷ Revenue</strong> (industry typical 30–40%).
+        <label>Mover Comp ÷ Revenue Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>Mover-only affordability check.</strong> Industry typical is 30–40% of revenue for mover wages. Default 40%.<br/><br/>
+          Applies tone to the "Mover Affordability" card — green comfortably under, warn approaching, red over.
         </span></span></label>
-        <input type="number" id="ceilingPct" value="16" step="0.5" />
-        <span class="hint">Per philosophy doc — definition of "comp" needs Ben's confirmation. Hover the ? above.</span>
+        <input type="number" id="ceilingPct" value="40" step="0.5" />
+        <span class="hint">Mover wages ÷ revenue. Default 40%.</span>
+      </div>
+      <div class="input-block">
+        <label>Manager + Leadership Comp $ <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>Total annual comp for everyone non-mover</strong> — BMs, regionals, salaried, ops, leadership. Feeds Manager Affordability + Combined cards. Leave at 0 to skip those views.
+        </span></span></label>
+        <input type="number" id="otherComp" value="0" step="100000" />
+        <span class="hint">Manager + ops + leadership salaries (annual).</span>
+      </div>
+      <div class="input-block">
+        <label>Manager Comp ÷ AGM Ceiling % <span class="tip" tabindex="0">?<span class="tip-body">
+          <strong>The philosophy-doc ceiling.</strong> Manager + leadership comp should sit around 16% of AGM — when it crosses ~16%, we reassess. Ben quoted 13.4% YoY on 5/11 as current run-rate.<br/><br/>
+          Only meaningful when Manager Comp $ is populated.
+        </span></span></label>
+        <input type="number" id="mgmtCeilingPct" value="16" step="0.5" />
+        <span class="hint">Manager comp ÷ AGM. Default 16% per philosophy doc.</span>
       </div>
     </div>
 
@@ -863,9 +913,16 @@
   <!-- =========================== AGGREGATE =========================== -->
   <section>
     <h2>Aggregate Impact <span class="badge" id="agg-label">Scenario A vs Current</span></h2>
-    <p class="sub">Live calculation across all positions and performance buckets.</p>
+    <p class="sub">Live calculation across all positions and performance buckets. Three affordability lenses below — mover, manager, and combined.</p>
 
-    <div class="cards" id="cards"></div>
+    <div class="agg-module-title" id="title-mover">🚚 Mover Affordability</div>
+    <div class="cards" id="cards-mover"></div>
+
+    <div class="agg-module-title" id="title-mgmt">👔 Manager + Leadership Affordability <span class="agg-module-sub" id="title-mgmt-sub"></span></div>
+    <div class="cards" id="cards-mgmt"></div>
+
+    <div class="agg-module-title" id="title-combined">📊 Combined / All-In <span class="agg-module-sub">placeholder — refine metrics later</span></div>
+    <div class="cards" id="cards-combined"></div>
 
     <div class="group-title">All Scenarios Side-by-Side</div>
     <div style="overflow-x: auto;">
@@ -1002,14 +1059,14 @@
       <p>The bottom section shows what an individual mover at a given position sees when we announce the new program. Pick the position, scenario, and <strong>branch tier</strong> (Standard vs. Houston/SAA). The annual TCC row is calibrated to that position's Hrs/yr — so it's a realistic year-one earnings projection at low / medium / high performance.</p>
       <p>Use this to sanity-check that the announcement actually feels like a raise to the mover you're talking to. If the high-performer line moves but the low-performer line is flat, that's worth knowing before you ship.</p>
 
-      <h3>Aggregate impact cards (top right of the Aggregate section)</h3>
+      <h3>Aggregate impact — three affordability lenses</h3>
+      <p>The Aggregate Impact section is split into three modules, each with its own ceiling and its own audience:</p>
       <ul>
-        <li><strong>Total Annual Mover Comp</strong> — the company-wide annual cost for the active scenario.</li>
-        <li><strong>Mover Comp ÷ Revenue</strong> — current run-rate is ~38–41%. Industry typical 30–40%. The cleanest mover-only affordability metric.</li>
-        <li><strong>Total Comp ÷ AGM</strong> — only useful if you fill in "All Other Annual Comp" (managers + ops + leadership). Compared against the ~16% ceiling from the philosophy doc.</li>
-        <li><strong>Blended Mover $/hr</strong> — total cost ÷ total mover-hours. The "average mover" wage.</li>
-        <li><strong>Implied FTEs</strong> — see above.</li>
+        <li><strong>🚚 Mover Affordability</strong> — total mover comp, Mover Comp ÷ Revenue (vs the 40% ceiling), blended $/hr, base/variable split, headcount, implied FTEs. This is the primary affordability check — green/warn/red against the ceiling.</li>
+        <li><strong>👔 Manager + Leadership Affordability</strong> — Manager Comp ÷ AGM (vs the 16% ceiling per the philosophy doc), plus Manager Comp ÷ Revenue as a secondary view. Only populates if you fill in "Manager + Leadership Comp $" in globals (otherwise grayed out).</li>
+        <li><strong>📊 Combined / All-In</strong> — placeholder/working set of revenue-based ratios: Total Comp ÷ Revenue, Total Comp ÷ AGM, Revenue per Mover Head, Revenue per FTE. We'll refine which metrics matter most once we've used it a few times.</li>
       </ul>
+      <p>Why three lenses: mover and manager comp scale differently and answer different questions. Mover comp is variable-with-revenue (driven by headcount × hours × wage). Manager comp is fixed (salaried). Keeping them separate lets each ceiling do its job without the math getting tangled.</p>
 
       <h3>Sharing & saving</h3>
       <p>Use the <strong>📎 Copy share link</strong> button (bottom of page). It packs your full state — all 3 scenarios, every input — into the URL and copies it to your clipboard. Paste in Slack or email and the recipient sees exactly what you see. State also auto-saves to your browser; close the tab and your work comes back.</p>
@@ -1052,7 +1109,8 @@ function defaultState() {
       revenue: 24000000,
       agmPct: 50,
       otherComp: 0,
-      ceilingPct: 16,
+      ceilingPct: 40,
+      mgmtCeilingPct: 16,
       fteBasis: 2080,
       branchDiff: -1.00,
       bulkDiffPct: 20,
@@ -1104,6 +1162,17 @@ function migrateState(s) {
   ['fteBasis', 'branchDiff', 'bulkDiffPct'].forEach(k => {
     if (s.globals[k] === undefined) s.globals[k] = def.globals[k];
   });
+  // v2.5: two-ceiling model. If old state has ceilingPct=16 (legacy AGM-ish
+  // default), interpret it as the manager-ceiling and switch mover ceiling to 40.
+  if (s.globals.mgmtCeilingPct === undefined) {
+    if (s.globals.ceilingPct === 16) {
+      s.globals.mgmtCeilingPct = 16;
+      s.globals.ceilingPct = 40;
+    } else {
+      s.globals.mgmtCeilingPct = def.globals.mgmtCeilingPct;
+    }
+  }
+  if (s.globals.otherComp === undefined) s.globals.otherComp = 0;
   // diffHc per position
   Object.keys(s.positions).forEach(posId => {
     if (s.positions[posId].diffHc === undefined) {
@@ -1285,6 +1354,7 @@ function renderGlobals() {
   document.getElementById('agmDollars').value = Math.round(state.globals.revenue * state.globals.agmPct / 100);
   document.getElementById('otherComp').value = state.globals.otherComp || 0;
   document.getElementById('ceilingPct').value = state.globals.ceilingPct;
+  document.getElementById('mgmtCeilingPct').value = state.globals.mgmtCeilingPct;
   document.getElementById('fteBasis').value = state.globals.fteBasis || 2080;
   document.getElementById('branchDiff').value = (state.globals.branchDiff !== undefined ? state.globals.branchDiff : -1.00);
   document.getElementById('bulkDiffPct').value = state.globals.bulkDiffPct !== undefined ? state.globals.bulkDiffPct : 20;
@@ -1435,38 +1505,34 @@ function renderAggregate() {
   const deltaCost = cmp.totalCost - cur.totalCost;
   const deltaPct = cur.totalCost > 0 ? (deltaCost / cur.totalCost) * 100 : 0;
   const deltaRev = cmp.moverCompToRev - cur.moverCompToRev;
-  const deltaTotalAgm = cmp.totalCompToAgm - cur.totalCompToAgm;
   const deltaAvg = cmp.avgPerHr - cur.avgPerHr;
   const deltaAvgPct = cur.avgPerHr > 0 ? (deltaAvg / cur.avgPerHr) * 100 : 0;
-  const ceiling = state.globals.ceilingPct;
+  const moverCeiling = state.globals.ceilingPct;
+  const mgmtCeiling = state.globals.mgmtCeilingPct;
   const hasOtherComp = (state.globals.otherComp || 0) > 0;
 
-  // Tone for ceiling: bad if over, good if comfortably under, warn if close
-  const ceilingTone = (v) => {
-    if (!hasOtherComp) return '';
-    if (v > ceiling) return 'bad';
-    if (v > ceiling - 1.5) return 'warn';
+  // Generic ceiling tone helper
+  const toneFor = (v, ceil) => {
+    if (v > ceil) return 'bad';
+    if (v > ceil - 1.5) return 'warn';
     return 'good';
   };
+  const moverTone = toneFor(cmp.moverCompToRev, moverCeiling);
+  const ceilingDelta = (v, ceil) => v < ceil
+    ? 'under by ' + (ceil - v).toFixed(2) + 'pp'
+    : 'OVER by ' + (v - ceil).toFixed(2) + 'pp';
 
-  // Cards
-  const cards = document.getElementById('cards');
-  const tone = (v) => v > 0.005 ? 'warn' : v < -0.005 ? 'good' : '';
-  cards.innerHTML = `
+  // ---------- Module 1: Mover Affordability ----------
+  document.getElementById('cards-mover').innerHTML = `
     <div class="stat">
       <div class="label">Total Annual Mover Comp</div>
       <div class="big">${fmtM(cmp.totalCost)}</div>
       <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaCost) + ' / ' + (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(2) + '% vs current'}</div>
     </div>
-    <div class="stat ${isCurrent ? '' : tone(deltaRev)}">
+    <div class="stat ${moverTone}">
       <div class="label">Mover Comp ÷ Revenue</div>
       <div class="big">${fmtPct(cmp.moverCompToRev)}</div>
-      <div class="delta">${isCurrent ? 'baseline' : (deltaRev >= 0 ? '+' : '') + (deltaRev * 100).toFixed(0) + ' bps vs current'}</div>
-    </div>
-    <div class="stat ${ceilingTone(cmp.totalCompToAgm)}">
-      <div class="label">Total Comp ÷ AGM ${hasOtherComp ? '' : '(needs other comp)'}</div>
-      <div class="big">${hasOtherComp ? fmtPct(cmp.totalCompToAgm) : '—'}</div>
-      <div class="delta">${hasOtherComp ? 'Ceiling: ' + ceiling + '% · ' + (cmp.totalCompToAgm < ceiling ? 'under by ' + (ceiling - cmp.totalCompToAgm).toFixed(2) + 'pp' : 'OVER by ' + (cmp.totalCompToAgm - ceiling).toFixed(2) + 'pp') : 'Add "All Other Annual Comp" above to compute'}</div>
+      <div class="delta">Ceiling ${moverCeiling}% · ${ceilingDelta(cmp.moverCompToRev, moverCeiling)}${isCurrent ? '' : ' · ' + (deltaRev >= 0 ? '+' : '') + (deltaRev * 100).toFixed(0) + ' bps vs current'}</div>
     </div>
     <div class="stat">
       <div class="label">Blended Mover $/hr</div>
@@ -1474,7 +1540,7 @@ function renderAggregate() {
       <div class="delta">${isCurrent ? 'baseline' : (deltaAvg >= 0 ? '+' : '−') + fmt$2(Math.abs(deltaAvg)) + ' / ' + (deltaAvgPct >= 0 ? '+' : '') + deltaAvgPct.toFixed(2) + '%'}</div>
     </div>
     <div class="stat">
-      <div class="label">Base $ / Variable $ (movers)</div>
+      <div class="label">Base $ / Variable $</div>
       <div class="big" style="font-size:18px">${fmtK(cmp.totalBase)} + ${fmtK(cmp.totalVar)}</div>
       <div class="delta">${(cmp.totalCost > 0 ? (cmp.totalVar / cmp.totalCost * 100).toFixed(1) : 0)}% of mover comp is variable</div>
     </div>
@@ -1490,6 +1556,76 @@ function renderAggregate() {
     </div>
   `;
 
+  // ---------- Module 2: Manager Affordability ----------
+  const mgmtTitleSub = document.getElementById('title-mgmt-sub');
+  const mgmtTitleEl = document.getElementById('title-mgmt');
+  if (hasOtherComp) {
+    mgmtTitleEl.classList.remove('muted');
+    mgmtTitleSub.textContent = 'vs ' + mgmtCeiling + '% AGM ceiling (philosophy doc)';
+    const mgmtPctAgm   = cmp.agmDollars > 0 ? (cmp.otherComp / cmp.agmDollars) * 100 : 0;
+    const mgmtPctRev   = cmp.revenue > 0 ? (cmp.otherComp / cmp.revenue) * 100 : 0;
+    const mgmtTone     = toneFor(mgmtPctAgm, mgmtCeiling);
+    document.getElementById('cards-mgmt').innerHTML = `
+      <div class="stat">
+        <div class="label">Manager + Leadership Comp</div>
+        <div class="big">${fmtM(cmp.otherComp)}</div>
+        <div class="delta">Annual, from input above</div>
+      </div>
+      <div class="stat ${mgmtTone}">
+        <div class="label">Manager Comp ÷ AGM</div>
+        <div class="big">${fmtPct(mgmtPctAgm)}</div>
+        <div class="delta">Ceiling ${mgmtCeiling}% · ${ceilingDelta(mgmtPctAgm, mgmtCeiling)}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Manager Comp ÷ Revenue</div>
+        <div class="big">${fmtPct(mgmtPctRev)}</div>
+        <div class="delta">Secondary view</div>
+      </div>
+    `;
+  } else {
+    mgmtTitleEl.classList.add('muted');
+    mgmtTitleSub.textContent = 'add Manager + Leadership Comp $ above to populate';
+    document.getElementById('cards-mgmt').innerHTML = `
+      <div class="stat" style="grid-column: 1 / -1; text-align:center; color:var(--muted);">
+        <div class="big" style="font-size:14px; font-weight:500;">— add Manager + Leadership Comp $ to compute —</div>
+      </div>
+    `;
+  }
+
+  // ---------- Module 3: Combined / All-In (placeholder) ----------
+  const totalAllComp = cmp.totalAllComp;
+  const totalCompRev = cmp.totalCompToRev;
+  const totalCompAgm = cmp.totalCompToAgm;
+  const revPerHead = cmp.totalHeadcount > 0 ? cmp.revenue / cmp.totalHeadcount : 0;
+  const revPerFte  = cmp.impliedFtes > 0 ? cmp.revenue / cmp.impliedFtes : 0;
+  document.getElementById('cards-combined').innerHTML = `
+    <div class="stat placeholder">
+      <div class="label">Total All-In Comp</div>
+      <div class="big">${fmtM(totalAllComp)}</div>
+      <div class="delta">Movers ${fmtM(cmp.totalCost)} + Mgmt ${fmtM(cmp.otherComp || 0)}</div>
+    </div>
+    <div class="stat placeholder">
+      <div class="label">Total Comp ÷ Revenue</div>
+      <div class="big">${hasOtherComp ? fmtPct(totalCompRev) : '—'}</div>
+      <div class="delta">${hasOtherComp ? 'All-in labor cost as % of top line' : 'needs Manager Comp $'}</div>
+    </div>
+    <div class="stat placeholder">
+      <div class="label">Total Comp ÷ AGM</div>
+      <div class="big">${hasOtherComp ? fmtPct(totalCompAgm) : '—'}</div>
+      <div class="delta">${hasOtherComp ? 'All-in labor cost as % of AGM' : 'needs Manager Comp $'}</div>
+    </div>
+    <div class="stat placeholder">
+      <div class="label">Revenue ÷ Mover Headcount</div>
+      <div class="big">${fmtK(revPerHead)}</div>
+      <div class="delta">Annual revenue per raw mover head</div>
+    </div>
+    <div class="stat placeholder">
+      <div class="label">Revenue ÷ Implied FTE</div>
+      <div class="big">${fmtK(revPerFte)}</div>
+      <div class="delta">Revenue per full-time-equivalent</div>
+    </div>
+  `;
+
   // Side-by-side
   const sxs = document.getElementById('sxs').querySelector('tbody');
   const hasOther = (state.globals.otherComp || 0) > 0;
@@ -1501,9 +1637,11 @@ function renderAggregate() {
     { label: 'Total Variable $', fn: t => fmtM(t.totalVar) },
     { label: 'Variable % of Mover Comp', fn: t => (t.totalCost > 0 ? (t.totalVar / t.totalCost * 100).toFixed(1) : 0) + '%' },
     { label: 'Blended Mover $/hr', fn: t => fmt$2(t.avgPerHr) },
-    { label: 'Mover Comp ÷ Revenue', fn: t => fmtPct(t.moverCompToRev) },
+    { label: 'Mover Comp ÷ Revenue (vs ' + state.globals.ceilingPct + '% ceiling)', fn: t => fmtPct(t.moverCompToRev) },
     { label: 'Mover Comp ÷ AGM', fn: t => fmtPct(t.moverCompToAgm) },
-    { label: 'Total Comp ÷ AGM (vs ' + state.globals.ceilingPct + '% ceiling)', fn: t => hasOther ? fmtPct(t.totalCompToAgm) : '—' },
+    { label: 'Manager Comp ÷ AGM (vs ' + state.globals.mgmtCeilingPct + '% ceiling)', fn: t => hasOther && t.agmDollars > 0 ? fmtPct(t.otherComp / t.agmDollars * 100) : '—' },
+    { label: 'Total Comp ÷ Revenue', fn: t => hasOther ? fmtPct(t.totalCompToRev) : '—' },
+    { label: 'Total Comp ÷ AGM', fn: t => hasOther ? fmtPct(t.totalCompToAgm) : '—' },
   ];
   const allTotals = {
     current: cur,
@@ -1675,7 +1813,7 @@ function renderAll() {
 // =============================================================================
 
 // Globals inputs
-const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'fteBasis', 'branchDiff', 'bulkDiffPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
+const globalFields = ['revenue', 'agmPct', 'otherComp', 'ceilingPct', 'mgmtCeilingPct', 'fteBasis', 'branchDiff', 'bulkDiffPct', 'distLow', 'distMed', 'distHigh', 'multLow', 'multMed', 'multHigh'];
 globalFields.forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input', (e) => {
@@ -1835,8 +1973,9 @@ document.getElementById('export-csv').addEventListener('click', () => {
   lines.push('Revenue,' + state.globals.revenue + ',,,,,,,,,,,,,,,');
   lines.push('AGM %,' + state.globals.agmPct + ',,,,,,,,,,,,,,,');
   lines.push('AGM $,' + Math.round(state.globals.revenue * state.globals.agmPct / 100) + ',,,,,,,,,,,,,,,');
-  lines.push('All Other Annual Comp $,' + (state.globals.otherComp || 0) + ',,,,,,,,,,,,,,,');
-  lines.push('Comp-to-AGM Ceiling %,' + state.globals.ceilingPct + ',,,,,,,,,,,,,,,');
+  lines.push('Manager + Leadership Comp $,' + (state.globals.otherComp || 0) + ',,,,,,,,,,,,,,,');
+  lines.push('Mover Comp ÷ Revenue Ceiling %,' + state.globals.ceilingPct + ',,,,,,,,,,,,,,,');
+  lines.push('Manager Comp ÷ AGM Ceiling %,' + state.globals.mgmtCeilingPct + ',,,,,,,,,,,,,,,');
   lines.push('FTE Basis (hrs/yr),' + (state.globals.fteBasis || 2080) + ',,,,,,,,,,,,,,,');
   lines.push('Branch Differential $/hr (Houston + SAA),' + (state.globals.branchDiff || 0).toFixed(2) + ',,,,,,,,,,,,,,,');
   lines.push('Dist L/M/H %,' + state.globals.distLow + '/' + state.globals.distMed + '/' + state.globals.distHigh + ',,,,,,,,,,,,,,,');
