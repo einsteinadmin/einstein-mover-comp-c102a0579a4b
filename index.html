@@ -1190,7 +1190,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.3).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.4).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1349,6 +1349,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.4 (5/13)</strong> — Added <strong>Total Cost Δ (loaded)</strong> tile in Mover Affordability — leads with the signed dollar delta of loaded mover cost between Current and the active scenario. Tones warn/good based on direction; sub-line shows % and the parallel wages-only delta.</li>
         <li><strong>v3.3 (5/13)</strong> — Baked Cameron's working state as the new defaults (revenue $26.4M, AGM 53%, manager comp $2.8M, all positions hrs/yr 1,550, lead var-max A/B re-tuned). FTE basis default 2,080 → <strong>1,820</strong> (35 hr/wk × 52 wks). Migration shim now repairs <code>fteBasis ≤ 0</code> to default.</li>
         <li><strong>v3.2 (5/13)</strong> — Added <strong>Saved Versions</strong> system. Snapshot the full state (globals + all scenarios + UI) under a name; reload later to restore exactly. Per-save share-link button generates a URL pointing at the saved state. Export-all-as-JSON / Import-from-JSON for cross-machine portability. Stored in localStorage at <code>einstein-mover-comp-saves-v1</code>, separate from the live working state.</li>
         <li><strong>v3.1 (5/13)</strong> — Burden default tuned from 20% → <strong>13%</strong> per Cameron's estimate (payroll taxes + workers comp + retirement match + health insurance). The Mover Comp ÷ Revenue ceiling now applies to the LOADED figure (wages × 1.13), making the 40% ceiling a true affordability gate. New "Mover Wages ÷ Revenue (unloaded)" reference card sits alongside for industry-benchmark comparison. Removed redundant "True Mover Cost ÷ Revenue" placeholder from Combined module (now covered by the loaded card in Mover Affordability).</li>
@@ -1899,6 +1900,11 @@ function renderAggregate() {
       <div class="label">True Total Mover Cost <span style="font-size:10px;font-weight:400;opacity:0.7">+${state.globals.burdenPct || 0}% burden</span></div>
       <div class="big">${fmtM(trueMoverCost)}</div>
       <div class="delta">${isCurrent ? 'baseline' : fmtSigned$(deltaTrueCost) + ' vs current (loaded)'}</div>
+    </div>
+    <div class="stat ${isCurrent ? '' : (deltaTrueCost > 1000 ? 'warn' : deltaTrueCost < -1000 ? 'good' : '')}">
+      <div class="label">Total Cost Δ <span style="font-size:10px;font-weight:400;opacity:0.7">loaded · vs Current</span></div>
+      <div class="big">${isCurrent ? '—' : fmtSigned$(deltaTrueCost)}</div>
+      <div class="delta">${isCurrent ? 'select Scenario A / B / C to compare' : (curTrueMoverCost > 0 ? ((deltaTrueCost / curTrueMoverCost) * 100 >= 0 ? '+' : '') + ((deltaTrueCost / curTrueMoverCost) * 100).toFixed(2) + '% vs current · wages-only Δ ' + fmtSigned$(deltaCost) : '')}</div>
     </div>
     <div class="stat ${moverTone}">
       <div class="label">Mover Cost ÷ Revenue <span style="font-size:10px;font-weight:400;opacity:0.7">loaded · +${state.globals.burdenPct || 0}% burden</span></div>
