@@ -238,6 +238,8 @@
   table.matrix.hide-col-headcount .col-headcount,
   table.matrix.hide-col-diffHc    .col-diffHc,
   table.matrix.hide-col-hrsPerYr  .col-hrsPerYr,
+  table.matrix.hide-col-ptoDays   .col-ptoDays,
+  table.matrix.hide-col-ptoCost   .col-ptoCost,
   table.matrix.hide-col-tccLow    .col-tccLow,
   table.matrix.hide-col-tccMed    .col-tccMed,
   table.matrix.hide-col-tccHigh   .col-tccHigh,
@@ -994,6 +996,7 @@
             <th class="col-headcount">Headcount</th>
             <th class="col-diffHc">Diff HC</th>
             <th class="col-hrsPerYr">Hrs/yr</th>
+            <th class="col-ptoDays">PTO Days</th>
             <th>Base $/hr</th>
             <th>Var Max $/hr</th>
             <th class="col-tccLow">TCC Low</th>
@@ -1008,6 +1011,7 @@
             <th class="col-deltaMed">Δ $/hr (med)</th>
             <th class="col-deltaMax">Δ $/hr (max)</th>
             <th class="col-avgPerHr">Avg $/hr</th>
+            <th class="col-ptoCost">PTO Cost</th>
             <th>Annual Cost</th>
             <th class="col-trueCost">True Annual Cost</th>
           </tr>
@@ -1019,6 +1023,7 @@
             <td id="foot-headcount" class="col-headcount" style="text-align:right"></td>
             <td id="foot-diff-hc" class="col-diffHc" style="text-align:right"></td>
             <td class="col-hrsPerYr"></td>
+            <td id="foot-pto-days" class="col-ptoDays" style="text-align:right"></td>
             <td colspan="2"></td>
             <td class="col-tccLow"></td>
             <td class="col-tccMed"></td>
@@ -1032,6 +1037,7 @@
             <td class="col-deltaMed"></td>
             <td class="col-deltaMax"></td>
             <td id="foot-avg" class="col-avgPerHr"></td>
+            <td id="foot-pto-cost" class="col-ptoCost"></td>
             <td id="foot-total"></td>
             <td id="foot-true" class="col-trueCost"></td>
           </tr>
@@ -1050,6 +1056,7 @@
             <label><input type="checkbox" data-col="headcount" /> Headcount</label>
             <label><input type="checkbox" data-col="diffHc" /> Diff HC</label>
             <label><input type="checkbox" data-col="hrsPerYr" /> Hrs/yr</label>
+            <label><input type="checkbox" data-col="ptoDays" /> PTO Days</label>
           </div>
           <div class="col-popover-group">
             <label><input type="checkbox" data-col="tccLow" /> TCC Low</label>
@@ -1066,6 +1073,7 @@
             <label><input type="checkbox" data-col="deltaMed" /> Δ $/hr (med)</label>
             <label><input type="checkbox" data-col="deltaMax" /> Δ $/hr (max)</label>
             <label><input type="checkbox" data-col="avgPerHr" /> Avg $/hr</label>
+            <label><input type="checkbox" data-col="ptoCost" /> PTO Cost</label>
             <label><input type="checkbox" data-col="trueCost" /> True Annual Cost</label>
           </div>
           <div class="col-popover-group">
@@ -1270,7 +1278,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.9.2).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.0).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1312,8 +1320,8 @@
         <li><code>jr</code> · Jr. Lead · lead · $19.50 · $1.75</li>
         <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
         <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
-        <li><code>master</code> · Master Lead · lead · $20.50 · $3.00</li>
-        <li><code>general</code> · Lead General · lead · $20.50 · $3.75 <em>(absorbed the 14 HOF folks in v3.9 — HC 11 → 25)</em></li>
+        <li><code>master</code> · Master Lead · lead · $20.50 · $3.00 · <strong>5 PTO days/yr</strong></li>
+        <li><code>general</code> · Lead General · lead · $20.50 · $3.75 · <strong>10 PTO days/yr</strong> <em>(absorbed the 14 HOF folks in v3.9 — HC 11 → 25)</em></li>
       </ul>
       <p><strong>Headcount defaults</strong>: Lead In Training 127 / Lead in Waiting 0 / Part-Time Lead 20 / Jr 21 / Reg 32 / Sr 15 / Master 15 / General 25. Total 255. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended).</p>
       <p><strong>Hall of Fame</strong> is retired as a paid position (v3.9). It's now an <em>award</em> earned by Lead Generals — swag, selectable PTO days, plaques, truck naming, possible one-time bonus, HR variable tracking. <strong>No pay impact</strong>; the tool no longer models it.</p>
@@ -1399,7 +1407,7 @@
         <li>Add <code>&lt;th&gt;</code> to the <code>&lt;thead&gt;</code> row. Include <code>class="col-&lt;name&gt;"</code> if hideable</li>
         <li>In <code>renderMatrix()</code>'s <code>tr.innerHTML</code> template, add a <code>&lt;td&gt;</code> in the right position</li>
         <li>If hideable: add <code>col-&lt;name&gt;</code> to the <code>&lt;td&gt;</code>, add to <code>HIDEABLE_COLS</code> constant, add checkbox in Columns popover, add CSS rule <code>table.matrix.hide-col-&lt;name&gt; .col-&lt;name&gt; { display: none; }</code></li>
-        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 20)</li>
+        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 22)</li>
         <li>Add to CSV export header + per-row values</li>
       </ol>
 
@@ -1441,6 +1449,7 @@
 
       <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v4.0 (5/14)</strong> — Added <strong>PTO</strong> to the position matrix. Two new columns: <strong>PTO Days</strong> (editable input, shared across scenarios since it's a position-level benefit) and <strong>PTO Cost</strong> (derived, hideable, shows annual dollar cost). Default PTO days: Master Lead 5, Lead General 10, everyone else 0. Cost formula: <code>ptoDays × 8 hrs × base pay</code> (base only, no variable on PTO). Branch differential applies — PTO at Houston/SAA uses baseDiff. PTO cost is rolled into Annual Cost so totals reflect true cost. Mover-view announcement table shows a "PTO Days" row when the selected position has PTO &gt; 0. CSV export gets PTO Days + Annual PTO Cost columns. Position tooltips on Master Lead and Lead General now mention PTO. Group-divider colspan 20 → 22.</li>
         <li><strong>v3.9.2 (5/14)</strong> — Headcount accounting fix: when Part-Time Lead was added in v3.8 (20 HC), those movers were already counted within Lead In Training (147). Pulled them out (147 → 127) so total stays at 255 instead of double-counting to 275. Cleaner formatting on position tooltips (proper paragraphs + lists instead of <code>&lt;br/&gt;</code> spacing) in v3.9.1.</li>
         <li><strong>v3.9 (5/14)</strong> — <strong>Hall of Fame retired as a paid position (LOCKED).</strong> All 14 HoF folks converted to Lead General pay path. Lead General default headcount bumped 11 → 25; Diff HC 2 → 5. Position removed from POSITIONS array; migration shim folds any persisted <code>hof</code> state into <code>general</code> on load. Per-person transition deal (+$1.75 base / variable capped $3.00 vs Lead General max $3.75 = ~7% raise) captured in the Lead General tooltip. Hall of Fame is now an <em>award</em> (swag, selectable PTO, plaques, truck naming, possible one-time bonus) with no pay-band impact.</li>
         <li><strong>v3.8 (5/14)</strong> — <strong>Role architecture rebrand.</strong> Renamed "Co-Pilot (Lead In Training)" → just <strong>"Lead In Training"</strong> (drops Co-Pilot terminology entirely; aligns with the job-posting framing that this is a transitional role, not a destination). Added new <strong>Part-Time Lead</strong> position between Lead in Waiting and Jr. Lead, in the ENTRY group. Tool models it as a single blended rate ($20.50 base, $0.75 var) — real structure is two pay buckets (Co-Pilot hours $20 no-var / Lead hours $21 + var) with quarter-wide KPI determining the lead-hour variable rate. Added per-position info tooltips (orange "i" icon) on the three transitional positions explaining the strategy + comp structure. New section 6 in this handoff explaining the role architecture.</li>
@@ -1491,14 +1500,14 @@
 // DATA
 // =============================================================================
 const POSITIONS = [
-  { id: 'copilot',  name: 'Lead In Training', base: 18.00, varMax: 1.50, headcount: 127, hrsPerYr: 1700, group: 'entry'  },
-  { id: 'waiting',  name: 'Lead in Waiting',  base:  0.00, varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'entry'  },
-  { id: 'parttime', name: 'Part-Time Lead',   base: 20.50, varMax: 0.75, headcount:  20, hrsPerYr: 1550, group: 'entry'  },
-  { id: 'jr',       name: 'Jr. Lead',         base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'master',  name: 'Master Lead',  base: 20.50, varMax: 3.00, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'general', name: 'Lead General', base: 20.50, varMax: 3.75, headcount:  25, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'copilot',  name: 'Lead In Training', base: 18.00, varMax: 1.50, headcount: 127, hrsPerYr: 1700, ptoDays:  0, group: 'entry'  },
+  { id: 'waiting',  name: 'Lead in Waiting',  base:  0.00, varMax: 0.00, headcount:   0, hrsPerYr: 1900, ptoDays:  0, group: 'entry'  },
+  { id: 'parttime', name: 'Part-Time Lead',   base: 20.50, varMax: 0.75, headcount:  20, hrsPerYr: 1550, ptoDays:  0, group: 'entry'  },
+  { id: 'jr',       name: 'Jr. Lead',         base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, ptoDays:  0, group: 'lead'   },
+  { id: 'reg',      name: 'Regular Lead',     base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, ptoDays:  0, group: 'lead'   },
+  { id: 'sr',       name: 'Sr. Lead',         base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, ptoDays:  0, group: 'lead'   },
+  { id: 'master',   name: 'Master Lead',      base: 20.50, varMax: 3.00, headcount:  15, hrsPerYr: 1900, ptoDays:  5, group: 'lead'   },
+  { id: 'general',  name: 'Lead General',     base: 20.50, varMax: 3.75, headcount:  25, hrsPerYr: 1900, ptoDays: 10, group: 'lead'   },
 ];
 
 const SCENARIOS = ['current', 'A', 'B', 'C'];
@@ -1525,28 +1534,28 @@ function defaultState() {
       multLow: 50, multMed: 80, multHigh: 100,
     },
     positions: {
-      copilot: { headcount: 127, diffHc: 25, hrsPerYr: 1550,
+      copilot: { headcount: 127, diffHc: 25, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 18.00, A: 20.00, B: 20.00, C: 18.00 },
         varMax: { current: 1.50,  A: 0.00,  B: 1.50,  C: 1.50  } },
-      waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1550,
+      waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 0.00, A: 0.00, B: 0.00, C: 0.00 },
         varMax: { current: 0.00, A: 0.00, B: 0.00, C: 0.00 } },
-      parttime: { headcount: 20, diffHc: 4, hrsPerYr: 1550,
+      parttime: { headcount: 20, diffHc: 4, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 20.50, A: 20.50, B: 20.50, C: 20.50 },
         varMax: { current: 0.75,  A: 0.75,  B: 0.75,  C: 0.75  } },
-      jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1550,
+      jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
         varMax: { current: 1.75,  A: 2.00,  B: 2.25,  C: 1.75  } },
-      reg:     { headcount: 32, diffHc: 6, hrsPerYr: 1550,
+      reg:     { headcount: 32, diffHc: 6, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 20.00, A: 21.50, B: 21.50, C: 20.00 },
         varMax: { current: 2.00,  A: 2.25,  B: 2.50,  C: 2.00  } },
-      sr:      { headcount: 15, diffHc: 3, hrsPerYr: 1550,
+      sr:      { headcount: 15, diffHc: 3, hrsPerYr: 1550, ptoDays: 0,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
         varMax: { current: 2.25,  A: 2.50,  B: 2.75,  C: 2.25  } },
-      master:  { headcount: 15, diffHc: 3, hrsPerYr: 1550,
+      master:  { headcount: 15, diffHc: 3, hrsPerYr: 1550, ptoDays: 5,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
         varMax: { current: 3.00,  A: 3.25,  B: 3.50,  C: 3.00  } },
-      general: { headcount: 25, diffHc: 5, hrsPerYr: 1550,
+      general: { headcount: 25, diffHc: 5, hrsPerYr: 1550, ptoDays: 10,
         base:   { current: 20.50, A: 23.00, B: 23.00, C: 20.50 },
         varMax: { current: 3.75,  A: 3.25,  B: 3.75,  C: 3.75  } },
     },
@@ -1556,18 +1565,18 @@ function defaultState() {
     moverTips: '5,8',
     moverBranch: 'std',
     hiddenCols: {
-      headcount: false, diffHc: false, hrsPerYr: false,
+      headcount: false, diffHc: false, hrsPerYr: false, ptoDays: false,
       tccLow: false, tccMed: false, tccHigh: false, varPct: false, promo: false,
       raiseL: false, raiseM: false, raiseH: false,
       deltaLow: false, deltaMed: false, deltaMax: false,
-      avgPerHr: false, trueCost: false,
+      avgPerHr: false, ptoCost: false, trueCost: false,
     },
     hiddenRows: {
       waiting: false,
     },
   };
 }
-const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','promo','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','trueCost'];
+const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','ptoDays','tccLow','tccMed','tccHigh','varPct','promo','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','ptoCost','trueCost'];
 
 // Forward-compat shim — fill in fields added after a state was saved/shared
 function migrateState(s) {
@@ -1627,6 +1636,12 @@ function migrateState(s) {
   }
   // v3.5: hiddenRows introduced — per-position row hide toggles
   if (!s.hiddenRows) s.hiddenRows = Object.assign({}, def.hiddenRows);
+  // v4.0: ptoDays introduced per position — seed from defaults if missing on a loaded state
+  Object.keys(s.positions).forEach(posId => {
+    if (s.positions[posId].ptoDays === undefined) {
+      s.positions[posId].ptoDays = (def.positions[posId] && def.positions[posId].ptoDays) || 0;
+    }
+  });
   // v3.9: HoF retired as a paid position — fold any persisted hof state into Lead General
   // and drop the hof entry. Pay defaults for Lead General are unchanged; only HC + Diff HC merge.
   if (s.positions && s.positions.hof && s.positions.general) {
@@ -1728,13 +1743,22 @@ function calcPosition(posId, scenario) {
   const annualBaseDiff = diffHc * p.hrsPerYr * baseDiff;
   const annualBase = annualBaseStd + annualBaseDiff;
   const annualVar  = p.headcount * p.hrsPerYr * expectedVarPerHr;
-  const annualCost = annualBase + annualVar;
+
+  // PTO cost: ptoDays × 8 hours × base pay (base only — no variable on PTO)
+  // Branch differential applies: PTO at standard branches uses base, at diff branches uses baseDiff
+  const ptoDays = p.ptoDays || 0;
+  const ptoHrsPerEmp = ptoDays * 8;
+  const ptoCostStd  = stdHc  * ptoHrsPerEmp * base;
+  const ptoCostDiff = diffHc * ptoHrsPerEmp * baseDiff;
+  const ptoCost = ptoCostStd + ptoCostDiff;
+
+  const annualCost = annualBase + annualVar + ptoCost;
 
   return {
     base, varMax, baseDiff, blendedBase,
     tccLow, tccMed, tccHigh,
     expectedVarPerHr, avgPerHr,
-    annualBase, annualVar, annualCost,
+    annualBase, annualVar, ptoCost, ptoDays, annualCost,
     headcount: p.headcount,
     diffHc, stdHc,
     hrsPerYr: p.hrsPerYr,
@@ -1752,11 +1776,12 @@ function calcRaisePct(posId, scenario, level) {
 }
 
 function calcScenarioTotals(scenario) {
-  let totalBase = 0, totalVar = 0, totalCost = 0, totalHeadcount = 0, totalDiffHc = 0, totalHrs = 0;
+  let totalBase = 0, totalVar = 0, totalPto = 0, totalCost = 0, totalHeadcount = 0, totalDiffHc = 0, totalHrs = 0;
   POSITIONS.forEach(p => {
     const r = calcPosition(p.id, scenario);
     totalBase += r.annualBase;
     totalVar  += r.annualVar;
+    totalPto  += r.ptoCost;
     totalCost += r.annualCost;
     totalHeadcount += r.headcount;
     totalDiffHc += r.diffHc;
@@ -1774,7 +1799,7 @@ function calcScenarioTotals(scenario) {
   const totalCompToRev = revenue > 0 ? (totalAllComp / revenue) * 100 : 0;
   const fteBasis = g.fteBasis || 2080;
   const impliedFtes = fteBasis > 0 ? totalHrs / fteBasis : 0;
-  return { totalBase, totalVar, totalCost, totalHeadcount, totalDiffHc, totalHrs, avgPerHr,
+  return { totalBase, totalVar, totalPto, totalCost, totalHeadcount, totalDiffHc, totalHrs, avgPerHr,
            moverCompToRev, moverCompToAgm, totalCompToAgm, totalCompToRev,
            totalAllComp, otherComp, revenue, agmDollars, impliedFtes, fteBasis };
 }
@@ -1888,6 +1913,7 @@ function renderMatrix() {
       '<span class="ptip-sub">Tool models a single blended rate — refine when multi-rate clocking is live.</span>',
     general:
       '<span class="ptip-h">Lead General — top of the Lead ladder</span>' +
+      '<p><strong>PTO benefit:</strong> 10 paid days per year (at 8 hrs × base pay).</p>' +
       '<p><strong>v3.9 decision (LOCKED):</strong> Hall of Fame retired as a paid position. All 14 HoF folks converted to the Lead General pay path; headcount bumped 11 → 25.</p>' +
       '<p><strong>Transition deal (per-person, one-time):</strong></p>' +
       '<ul>' +
@@ -1898,6 +1924,11 @@ function renderMatrix() {
       '<p>The Lead General pay band itself is unchanged ($20.50 base / $3.75 var max). The deal is a personal adjustment for the 14 converting, not a structural change to the role.</p>' +
       '<p><strong>Hall of Fame is now an award, not a pay band</strong> — earned by Lead Generals via swag, selectable PTO days, plaques, truck naming, possible one-time bonus, HR variable tracking.</p>' +
       '<span class="ptip-sub">No pay impact from HoF — purely recognition.</span>',
+    master:
+      '<span class="ptip-h">Master Lead</span>' +
+      '<p><strong>PTO benefit:</strong> 5 paid days per year (at 8 hrs × base pay).</p>' +
+      '<p>Senior Lead-tier with elevated variable cap. PTO is the first formal time-off benefit on the ladder — Jr / Reg / Sr Leads don\'t earn PTO days at this position level.</p>' +
+      '<span class="ptip-sub">PTO cost rolls into Annual Cost in the totals.</span>',
   };
   function posTipHtml(id) {
     const t = POS_TOOLTIPS[id];
@@ -1924,7 +1955,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="20">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="22">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -1975,6 +2006,7 @@ function renderMatrix() {
       <td class="col-headcount"><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
       <td class="col-diffHc"><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
       <td class="col-hrsPerYr"><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
+      <td class="col-ptoDays"><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.ptoDays || 0}" data-field="ptoDays" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/>${baseBaseline}</td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/>${varBaseline}</td>
       <td class="col-tccLow">${fmt$2(r.tccLow)}${sub('vs ' + (cur ? fmt$2(cur.tccLow) : '—'))}</td>
@@ -2003,6 +2035,7 @@ function renderMatrix() {
       ${deltaCell('med', 'col-deltaMed')}
       ${deltaCell('high', 'col-deltaMax')}
       <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}${sub('vs ' + (cur ? fmt$2(cur.avgPerHr) : '—'))}</td>
+      <td class="col-ptoCost">${r.ptoCost > 0 ? fmt$(r.ptoCost) : '—'}${sub('vs ' + (cur ? (cur.ptoCost > 0 ? fmt$(cur.ptoCost) : '—') : '—'))}</td>
       <td>${fmt$(r.annualCost)}${sub('vs ' + (cur ? fmt$(cur.annualCost) : '—'))}</td>
       <td class="col-trueCost">${fmt$(trueCostNow)}${sub('vs ' + (cur ? fmt$(curTrueCost) : '—'))}</td>
     `;
@@ -2016,8 +2049,8 @@ function renderMatrix() {
       const field = e.target.dataset.field;
       const val = parseFloat(e.target.value) || 0;
       const sce2 = activeScenario();
-      if (field === 'headcount' || field === 'hrsPerYr' || field === 'diffHc') {
-        // Headcount, diffHc, and hrs are shared across scenarios
+      if (field === 'headcount' || field === 'hrsPerYr' || field === 'diffHc' || field === 'ptoDays') {
+        // Headcount, diffHc, hrs, and ptoDays are shared across scenarios
         // Cap diffHc at headcount
         if (field === 'diffHc') {
           state.positions[pos][field] = Math.min(Math.max(0, val), state.positions[pos].headcount);
@@ -2040,6 +2073,10 @@ function renderMatrix() {
   const tot = calcScenarioTotals(sce);
   document.getElementById('foot-headcount').textContent = tot.totalHeadcount;
   document.getElementById('foot-diff-hc').textContent = tot.totalDiffHc;
+  // Sum PTO days across all positions (just a sum of the per-position values)
+  const totalPtoDays = POSITIONS.reduce((sum, p) => sum + ((state.positions[p.id] && state.positions[p.id].ptoDays) || 0), 0);
+  document.getElementById('foot-pto-days').textContent = totalPtoDays;
+  document.getElementById('foot-pto-cost').textContent = tot.totalPto > 0 ? fmt$(tot.totalPto) : '—';
   document.getElementById('foot-avg').textContent = fmt$2(tot.avgPerHr);
   document.getElementById('foot-total').textContent = fmt$(tot.totalCost);
   const burdMult = 1 + (state.globals.burdenPct || 0) / 100;
@@ -2359,6 +2396,12 @@ function renderMoverView() {
           <td style="color:#6B6B6B">Apples-to-apples at same perf tier</td>
         </tr>
         ${tipsRange}
+        ${(state.positions[posId] && state.positions[posId].ptoDays > 0) ? `
+        <tr>
+          <td class="col-perf">PTO Days (per year)</td>
+          <td colspan="3" style="text-align:center; font-weight:600;">${state.positions[posId].ptoDays} days</td>
+          <td style="color:#6B6B6B">Paid time off — earned by position level</td>
+        </tr>` : ''}
         <tr style="background:#F8F8F8">
           <td class="col-perf">Annual TCC (at ${Math.round(sceR.hrsPerYr).toLocaleString()} hrs/yr)</td>
           <td>${fmt$(annualBase + annualVarLow)}</td>
@@ -2515,7 +2558,7 @@ document.getElementById('mover-branch').addEventListener('change', e => {
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Promo Raise % (vs prev position TCC max)','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','True Annual Cost (+burden)','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','PTO Days','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Promo Raise % (vs prev position TCC max)','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual PTO Cost','Annual Total','True Annual Cost (+burden)','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
   POSITIONS.forEach(p => {
     const curR = calcPosition(p.id, 'current');
     SCENARIOS.forEach(s => {
@@ -2539,13 +2582,14 @@ document.getElementById('export-csv').addEventListener('click', () => {
         ? (((r.tccHigh - prevTcc) / prevTcc * 100).toFixed(1) + '%')
         : '';
       lines.push([
-        p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
+        p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, r.ptoDays, s,
         r.base.toFixed(2), r.baseDiff.toFixed(2), r.varMax.toFixed(2),
         r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
         varPct.toFixed(1) + '%',
         promoStr,
         r.blendedBase.toFixed(2), r.avgPerHr.toFixed(2),
-        Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost), Math.round(trueCost),
+        Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.ptoCost),
+        Math.round(r.annualCost), Math.round(trueCost),
         s === 'current' ? '' : (rL || 0).toFixed(2),
         s === 'current' ? '' : (rM || 0).toFixed(2),
         s === 'current' ? '' : (rH || 0).toFixed(2),
