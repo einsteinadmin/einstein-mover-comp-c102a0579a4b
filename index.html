@@ -54,8 +54,9 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 20px 22px;
-    margin-top: 18px;
+    margin-top: 24px;
   }
+  section:first-of-type { margin-top: 24px; }
   section h2 {
     margin: 0 0 4px;
     font-size: 16px;
@@ -474,33 +475,33 @@
   }
   .stat.placeholder .label { color: #075F9D; }
 
-  /* Aggregate module headings */
+  /* Aggregate module headings — thin orange accent, neutral text. Subtle but distinct. */
   .agg-module-title {
-    margin: 22px 0 8px;
-    padding: 8px 12px;
-    background: var(--orange-soft);
-    border-left: 4px solid var(--orange);
-    border-radius: 0 6px 6px 0;
-    font-size: 13.5px;
+    margin: 28px 0 12px;
+    padding: 2px 0 8px 12px;
+    background: transparent;
+    border-left: 3px solid var(--orange);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    font-size: 13px;
     font-weight: 700;
-    color: var(--orange-dark);
+    color: var(--ink);
     letter-spacing: -0.005em;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     gap: 12px;
     flex-wrap: wrap;
   }
-  .agg-module-title:first-of-type { margin-top: 12px; }
+  .agg-module-title:first-of-type { margin-top: 16px; }
   .agg-module-title .agg-module-sub {
     font-size: 11.5px;
-    font-weight: 500;
-    opacity: 0.75;
+    font-weight: 400;
+    color: var(--muted);
     text-transform: none;
     letter-spacing: 0;
   }
   .agg-module-title.muted {
-    background: #F4F4F4;
     border-left-color: var(--line-strong);
     color: var(--muted);
   }
@@ -1295,7 +1296,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.4.1).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.5).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1466,6 +1467,7 @@
 
       <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v4.5 (5/14)</strong> — Design pass 3 (arrange/rhythm). Aggregate module title bars toned down: was orange-soft background + orange-dark text + heavy bold; now neutral text with thin orange left rule + bottom hairline (still distinct, no longer competing for attention with the cards beneath). Section margin bumped 18px → 24px for slightly more breathing room between top-level sections.</li>
         <li><strong>v4.4.1 (5/14)</strong> — Reverted the v4.3 matrix-input styling per Cameron — input cells back to transparent borders/backgrounds (no gray fill, no hover state changes). Cell-baseline subtext reverted to original 10.5px/lighter gray. The v4.3 Roboto load + v4.4 button-color discipline stay in place.</li>
         <li><strong>v4.4 (5/14)</strong> — Design pass 2 (color discipline). Primary action buttons (Copy share link, Save current state, Load) flipped from orange → <strong>blue (#0979C3)</strong> so "click here to DO something" is visually distinct from accent orange. Orange now reserved for state indicators (active tab, ceiling-warn tone) and accents (module headers, badges, "i" icons). Killed the invented purple in Combined module placeholder cards — replaced with light blue tint (#E0F2FE) + dashed border (matches EMMA's info-banner pattern; signals "informational / work-in-progress").</li>
         <li><strong>v4.3 (5/14)</strong> — Design pass 1 (typography + discoverability). Roboto now explicitly loaded from Google Fonts (was system-font fallback). Matrix input cells now have light gray fill (#F6F6F6) + subtle border, hover state, and white focus state — gives cold-open users an obvious "you can edit this" signal vs. the prior transparent inputs. Cell-baseline subtext bumped 10.5px → 11px for legibility.</li>
