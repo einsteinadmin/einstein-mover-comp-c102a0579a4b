@@ -242,6 +242,7 @@
   table.matrix.hide-col-tccMed    .col-tccMed,
   table.matrix.hide-col-tccHigh   .col-tccHigh,
   table.matrix.hide-col-varPct    .col-varPct,
+  table.matrix.hide-col-promo     .col-promo,
   table.matrix.hide-col-raiseL    .col-raiseL,
   table.matrix.hide-col-raiseM    .col-raiseM,
   table.matrix.hide-col-raiseH    .col-raiseH,
@@ -927,6 +928,7 @@
             <th class="col-tccMed">TCC Med</th>
             <th class="col-tccHigh">TCC High</th>
             <th class="col-varPct">Var % (max)</th>
+            <th class="col-promo">Promo Raise %</th>
             <th class="col-raiseL">Raise % L</th>
             <th class="col-raiseM">Raise % M</th>
             <th class="col-raiseH">Raise % H</th>
@@ -950,6 +952,7 @@
             <td class="col-tccMed"></td>
             <td class="col-tccHigh"></td>
             <td class="col-varPct"></td>
+            <td class="col-promo"></td>
             <td class="col-raiseL"></td>
             <td class="col-raiseM"></td>
             <td class="col-raiseH"></td>
@@ -981,6 +984,7 @@
             <label><input type="checkbox" data-col="tccMed" /> TCC Med</label>
             <label><input type="checkbox" data-col="tccHigh" /> TCC High</label>
             <label><input type="checkbox" data-col="varPct" /> Var % (max)</label>
+            <label><input type="checkbox" data-col="promo" /> Promo Raise %</label>
           </div>
           <div class="col-popover-group">
             <label><input type="checkbox" data-col="raiseL" /> Raise % L</label>
@@ -1194,7 +1198,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.6).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.7).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1311,7 +1315,7 @@
         <li>Add <code>&lt;th&gt;</code> to the <code>&lt;thead&gt;</code> row. Include <code>class="col-&lt;name&gt;"</code> if hideable</li>
         <li>In <code>renderMatrix()</code>'s <code>tr.innerHTML</code> template, add a <code>&lt;td&gt;</code> in the right position</li>
         <li>If hideable: add <code>col-&lt;name&gt;</code> to the <code>&lt;td&gt;</code>, add to <code>HIDEABLE_COLS</code> constant, add checkbox in Columns popover, add CSS rule <code>table.matrix.hide-col-&lt;name&gt; .col-&lt;name&gt; { display: none; }</code></li>
-        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 19)</li>
+        <li>If it affects totals: update <code>&lt;tfoot&gt;</code> cell count + group-divider <code>colspan</code> (currently 20)</li>
         <li>Add to CSV export header + per-row values</li>
       </ol>
 
@@ -1353,6 +1357,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.7 (5/14)</strong> — Added <strong>Promo Raise %</strong> column to the position matrix. Shows the % step-up from the previous position's TCC max (Co-Pilot has no prev → "—"; Lead in Waiting skipped when zeroed; HOF compares to Lead General). Hideable via Columns picker; included in CSV. Has inline baseline (vs Current scenario's promo raise) on A/B/C tabs. Group-divider colspan now 20.</li>
         <li><strong>v3.6 (5/14)</strong> — Extended the "vs $X.XX" inline baseline pattern from Base / Var Max to <strong>all comparison columns</strong>: TCC Low/Med/High, Var % (max), Avg $/hr, Annual Cost, True Annual Cost. Visible on A/B/C tabs only; hidden on Current. Makes scenario vs current comparison instant for every value in the row.</li>
         <li><strong>v3.5 (5/14)</strong> — Moved "Lead in Waiting" from the LEADS group into ENTRY so it sits above the LEADS divider. Added <strong>Hide Rows</strong> section in the Columns picker with a "Lead in Waiting" toggle. Hidden rows are visual-only; aggregates still include them.</li>
         <li><strong>v3.4 (5/13)</strong> — Added <strong>Total Cost Δ (loaded)</strong> tile in Mover Affordability — leads with the signed dollar delta of loaded mover cost between Current and the active scenario. Tones warn/good based on direction; sub-line shows % and the parallel wages-only delta.</li>
@@ -1465,7 +1470,7 @@ function defaultState() {
     moverBranch: 'std',
     hiddenCols: {
       headcount: false, diffHc: false, hrsPerYr: false,
-      tccLow: false, tccMed: false, tccHigh: false, varPct: false,
+      tccLow: false, tccMed: false, tccHigh: false, varPct: false, promo: false,
       raiseL: false, raiseM: false, raiseH: false,
       deltaLow: false, deltaMed: false, deltaMax: false,
       avgPerHr: false, trueCost: false,
@@ -1475,7 +1480,7 @@ function defaultState() {
     },
   };
 }
-const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','trueCost'];
+const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','promo','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','trueCost'];
 
 // Forward-compat shim — fill in fields added after a state was saved/shared
 function migrateState(s) {
@@ -1764,6 +1769,16 @@ function renderMatrix() {
     });
   }
 
+  // Helper: previous-position TCC max in a given scenario (skips zeroed rows)
+  function prevTccHighFor(posId, scenario) {
+    const idx = POSITIONS.findIndex(x => x.id === posId);
+    for (let i = idx - 1; i >= 0; i--) {
+      const r = calcPosition(POSITIONS[i].id, scenario);
+      if (r.tccHigh > 0) return r.tccHigh;
+    }
+    return 0;
+  }
+
   let lastGroup = null;
   POSITIONS.forEach(p => {
     // Skip rows marked hidden in state.hiddenRows
@@ -1773,7 +1788,7 @@ function renderMatrix() {
       const groupRow = document.createElement('tr');
       groupRow.className = 'group-divider';
       const label = p.group === 'entry' ? 'ENTRY' : p.group === 'lead' ? 'LEADS' : 'LEGACY';
-      groupRow.innerHTML = `<th colspan="19">${label}</th>`;
+      groupRow.innerHTML = `<th colspan="20">${label}</th>`;
       tbody.appendChild(groupRow);
     }
 
@@ -1830,6 +1845,21 @@ function renderMatrix() {
       <td class="col-tccMed">${fmt$2(r.tccMed)}${sub('vs ' + (cur ? fmt$2(cur.tccMed) : '—'))}</td>
       <td class="col-tccHigh">${fmt$2(r.tccHigh)}${sub('vs ' + (cur ? fmt$2(cur.tccHigh) : '—'))}</td>
       <td class="col-varPct">${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}${sub('vs ' + curVarPct)}</td>
+      ${(() => {
+        const prevTcc = prevTccHighFor(p.id, sce);
+        const promo = (prevTcc > 0 && r.tccHigh > 0) ? ((r.tccHigh - prevTcc) / prevTcc * 100) : null;
+        let curPromoStr = '—';
+        if (cur) {
+          const curPrev = prevTccHighFor(p.id, 'current');
+          if (curPrev > 0 && cur.tccHigh > 0) {
+            curPromoStr = ((cur.tccHigh - curPrev) / curPrev * 100).toFixed(1) + '%';
+          }
+        }
+        if (promo === null) return `<td class="col-promo delta-zero">—${sub('vs ' + curPromoStr)}</td>`;
+        const cls = promo > 0.005 ? 'delta-pos' : promo < -0.005 ? 'delta-neg' : 'delta-zero';
+        const sign = promo > 0 ? '+' : '';
+        return `<td class="col-promo ${cls}">${sign}${promo.toFixed(1)}%${sub('vs ' + curPromoStr)}</td>`;
+      })()}
       ${raiseCell(rL, 'col-raiseL')}
       ${raiseCell(rM, 'col-raiseM')}
       ${raiseCell(rH, 'col-raiseH')}
@@ -2349,7 +2379,7 @@ document.getElementById('mover-branch').addEventListener('change', e => {
 document.getElementById('export-csv').addEventListener('click', () => {
   const lines = [];
   // Header
-  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','True Annual Cost (+burden)','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
+  lines.push(['Position','Group','Headcount','Diff HC','Hrs/yr','Scenario','Base Std $/hr','Base Diff $/hr','Var Max $/hr','TCC Low (Std)','TCC Med (Std)','TCC High (Std)','Var % of Max TCC','Promo Raise % (vs prev position TCC max)','Blended Base $/hr','Avg $/hr (blended)','Annual Base','Annual Variable','Annual Total','True Annual Cost (+burden)','Raise % L','Raise % M','Raise % H','Δ $/hr at low (vs Current)','Δ $/hr at med (vs Current)','Δ $/hr at max (vs Current)'].join(','));
   POSITIONS.forEach(p => {
     const curR = calcPosition(p.id, 'current');
     SCENARIOS.forEach(s => {
@@ -2362,11 +2392,22 @@ document.getElementById('export-csv').addEventListener('click', () => {
       const deltaMed = s === 'current' ? 0 : (r.tccMed - curR.tccMed);
       const deltaMax = s === 'current' ? 0 : (r.tccHigh - curR.tccHigh);
       const trueCost = r.annualCost * (1 + (state.globals.burdenPct || 0) / 100);
+      // Promo raise: position-to-previous-position TCC max delta in this scenario
+      const posIdx = POSITIONS.findIndex(x => x.id === p.id);
+      let prevTcc = 0;
+      for (let i = posIdx - 1; i >= 0; i--) {
+        const pr = calcPosition(POSITIONS[i].id, s);
+        if (pr.tccHigh > 0) { prevTcc = pr.tccHigh; break; }
+      }
+      const promoStr = (prevTcc > 0 && r.tccHigh > 0)
+        ? (((r.tccHigh - prevTcc) / prevTcc * 100).toFixed(1) + '%')
+        : '';
       lines.push([
         p.name, p.group, r.headcount, r.diffHc, r.hrsPerYr, s,
         r.base.toFixed(2), r.baseDiff.toFixed(2), r.varMax.toFixed(2),
         r.tccLow.toFixed(2), r.tccMed.toFixed(2), r.tccHigh.toFixed(2),
         varPct.toFixed(1) + '%',
+        promoStr,
         r.blendedBase.toFixed(2), r.avgPerHr.toFixed(2),
         Math.round(r.annualBase), Math.round(r.annualVar), Math.round(r.annualCost), Math.round(trueCost),
         s === 'current' ? '' : (rL || 0).toFixed(2),
