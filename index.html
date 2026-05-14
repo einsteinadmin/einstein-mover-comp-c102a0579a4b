@@ -330,6 +330,60 @@
     color: var(--ink);
   }
   table.matrix .pos-name.hof { color: var(--muted); font-style: italic; }
+  /* Per-position info tooltip (anchored inside the sticky col, opens to the right) */
+  .pos-tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 6px;
+    border: 1px solid var(--orange);
+    vertical-align: middle;
+  }
+  .pos-tip .pos-tip-body {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    transform: translateY(-50%);
+    width: 340px;
+    background: #1F1F1F;
+    color: white;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.55;
+    text-align: left;
+    z-index: 1000;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+    pointer-events: none;
+    transition: opacity 0.15s, visibility 0.15s;
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: normal;
+  }
+  .pos-tip .pos-tip-body::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: #1F1F1F;
+  }
+  .pos-tip:hover .pos-tip-body, .pos-tip:focus .pos-tip-body { visibility: visible; opacity: 1; }
+  .pos-tip .pos-tip-body strong { color: #FFD9A8; }
+  .pos-tip .pos-tip-body em { color: #C8E6B5; font-style: normal; }
   table.matrix .delta-pos { color: var(--green); font-weight: 600; }
   table.matrix .delta-neg { color: var(--red); font-weight: 600; }
   table.matrix .delta-zero { color: var(--muted); }
@@ -1133,8 +1187,8 @@
       <div class="callout"><strong>Three scenarios, one baseline.</strong> Everything is compared against <em>Current</em> (locked, not editable). Scenarios A, B, and C are sandboxes you can edit. Switch between them with the tabs above the position matrix.</div>
 
       <h3>The three pre-loaded scenarios</h3>
-      <div class="scenario-card"><strong>Scenario A — "Flat $20 Co-Pilot, raises across leads."</strong> Co-Pilot base jumps to $20/hr but loses its variable component (Cameron's hypothesis: simpler entry-level pay attracts more applicants and removes a confusing piece of the offer). All lead positions get base + variable raises. Net impact ≈ +$558K / +6% vs current.</div>
-      <div class="scenario-card"><strong>Scenario B — "$20 Co-Pilot keeping the variable."</strong> Same as A, but Co-Pilots also keep their $1.50/hr variable. Tests Paul's hypothesis that variable still matters at entry-level. Lead raises identical to A. Net impact ≈ +$850K / +9% vs current.</div>
+      <div class="scenario-card"><strong>Scenario A — "Flat $20 Lead In Training, raises across leads."</strong> Lead In Training base jumps to $20/hr but loses its variable component (Cameron's hypothesis: simpler entry-level pay attracts more applicants and removes a confusing piece of the offer). All lead positions get base + variable raises.</div>
+      <div class="scenario-card"><strong>Scenario B — "$20 Lead In Training keeping the variable."</strong> Same as A, but Lead In Training keeps their $1.50/hr variable. Tests Paul's hypothesis that variable still matters at entry-level. Lead raises identical to A.</div>
       <div class="scenario-card"><strong>Scenario C — "No-change baseline."</strong> A copy of Current, editable. Useful when you want to test ONE specific change in isolation without rebuilding from scratch.</div>
 
       <h3>The position matrix — what each column means</h3>
@@ -1198,7 +1252,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.7).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.8).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1232,10 +1286,11 @@
       <p><strong>Calc.</strong> Two pure functions: <code>calcPosition(posId, scenario)</code> returns per-position economics. <code>calcScenarioTotals(scenario)</code> rolls up to company totals. No state mutation — easy to reason about.</p>
 
       <h3>5. Data model — positions, scenarios, globals</h3>
-      <p><strong>Eight positions</strong> in display order (id · name · group · default base · default var max):</p>
+      <p><strong>Nine positions</strong> in display order (id · name · group · default base · default var max):</p>
       <ul>
-        <li><code>copilot</code> · Co-Pilot (Lead In Training) · entry · $18.00 · $1.50</li>
-        <li><code>waiting</code> · Lead in Waiting · <strong>entry</strong> · $0.00 · $0.00 <em>(sits above the LEADS divider; hideable via Columns picker → Hide Rows)</em></li>
+        <li><code>copilot</code> · Lead In Training · entry · $18.00 · $1.50 <em>(renamed from Co-Pilot in v3.8 — explicit "this is transitional, not a destination" framing)</em></li>
+        <li><code>waiting</code> · Lead in Waiting · entry · $0.00 · $0.00 <em>(placeholder for trained movers awaiting an open Jr. Lead seat; hideable via Columns picker → Hide Rows)</em></li>
+        <li><code>parttime</code> · Part-Time Lead · entry · $20.50 · $0.75 <em>(NEW v3.8 — hybrid role: leads some shifts, co-pilots others. Two pay buckets at $20 no-var / $21 + var. Tool models a single blended rate.)</em></li>
         <li><code>jr</code> · Jr. Lead · lead · $19.50 · $1.75</li>
         <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
         <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
@@ -1243,7 +1298,8 @@
         <li><code>general</code> · Lead General · lead · $20.50 · $3.75</li>
         <li><code>hof</code> · HOF (legacy) · legacy · $21.68 · $1.75</li>
       </ul>
-      <p><strong>Headcount defaults</strong> (Q1 2026): 147 / 0 / 21 / 32 / 15 / 15 / 11 / 14 = 255 total. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended; refine per-position as payroll data lands).</p>
+      <p><strong>Headcount defaults</strong>: Lead In Training 147 / Lead in Waiting 0 / Part-Time Lead 20 / Jr 21 / Reg 32 / Sr 15 / Master 15 / General 11 / HOF 14. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended).</p>
+      <p><strong>Hover the orange "i" icon next to each transitional position name</strong> (Lead In Training, Lead in Waiting, Part-Time Lead) for the strategic rationale and the comp structure details.</p>
       <p><strong>Lead in Waiting</strong> is a forward-looking placeholder for a new role between Co-Pilot and Jr. Lead. Zeroed across all four scenarios in v2.7 — fill in base/var/headcount when the role is defined and we want to model its cost.</p>
 
       <p><strong>Three scenarios:</strong></p>
@@ -1269,7 +1325,16 @@
         <li><code>multLow/Med/High</code> · 50/80/100% · variable % earned at each tier</li>
       </ul>
 
-      <h3>6. Branch differential math</h3>
+      <h3>6. Role architecture — Lead In Training, Lead in Waiting, Part-Time Lead</h3>
+      <p>The first three positions are <strong>transitional roles</strong> — not destinations. The architecture is intentional:</p>
+      <ul>
+        <li><strong>Lead In Training</strong> (formerly "Co-Pilot") — entry-level hire. Pay is intentionally higher than industry-typical for the role because we recruit Lead-quality candidates. Anyone hired into this position is told upfront that staying here long-term is not an option — the job posting explicitly frames the role as a path to Lead, not a permanent helper job. Target time in role: 3-6 months before promotion / Part-Time Lead / Lead in Waiting / parting of ways.</li>
+        <li><strong>Lead in Waiting</strong> (placeholder, not yet formalized) — bridge role for movers who completed training, BM has confidence in them, but no Jr. Lead seat is open at their branch. Interim wage between Lead In Training ($20) and Jr. Lead ($21). Held for max 3-6 months before either a seat opens, they transfer to a growing branch, or the "this branch can't grow you" conversation.</li>
+        <li><strong>Part-Time Lead</strong> — hybrid role for movers who completed training and the BM has partial confidence in. Leads some shifts (paid $21/hr base + variable on lead hours only), co-pilots others (paid $20/hr base, no variable). <strong>Important nuance:</strong> the variable <em>rate</em> on lead hours is determined by the employee's quarterly KPI performance <em>across the entire quarter</em> (not just the hours they led) — so a strong overall quarter pulls up their lead-hour variable rate. Multi-rate timeclock implementation is non-trivial but figureoutable.</li>
+      </ul>
+      <p><strong>Why this matters for the comp model:</strong> these three roles are how the company sustains its "no permanent helpers" growth strategy. The tool currently models all three with single blended rates as a working approximation. When Lead in Waiting is formalized and Part-Time Lead's multi-rate clocking is in production, the model should split these into actual two-bucket cost calcs.</p>
+
+      <h3>7. Branch differential math</h3>
       <p>For each position, headcount splits into two cohorts:</p>
       <ul>
         <li>Standard branches (8 of 10): <code>headcount − diffHc</code> people earn <code>base</code></li>
@@ -1283,7 +1348,7 @@
         annualCost = annualBase + annualVar
       </p>
 
-      <h3>7. Three affordability modules</h3>
+      <h3>8. Three affordability modules</h3>
       <ul>
         <li><strong>🚚 Mover Affordability</strong> — total mover wages + loaded cost, Mover Cost ÷ Revenue loaded (vs 40% ceiling), unloaded wages ÷ revenue (reference), blended $/hr, base/variable split, headcount, implied FTEs</li>
         <li><strong>👔 Manager Affordability</strong> — gated on <code>otherComp &gt; 0</code>. Manager Comp $, Manager Comp ÷ AGM (vs 16% ceiling), Manager Comp ÷ Revenue</li>
@@ -1291,7 +1356,7 @@
       </ul>
       <p>Mover comp scales with revenue (headcount × hours × wage). Manager comp is fixed (salaried). Different ceilings answer different questions — keep them separate.</p>
 
-      <h3>8. UI features worth knowing</h3>
+      <h3>9. UI features worth knowing</h3>
       <ul>
         <li><strong>"📖 How to use"</strong> — user-facing walkthrough modal</li>
         <li><strong>"🔧 Handoff doc"</strong> — this modal</li>
@@ -1304,7 +1369,7 @@
         <li><strong>CSV export</strong> — always includes every column regardless of which are hidden</li>
       </ul>
 
-      <h3>9. Common edits — HOW TO</h3>
+      <h3>10. Common edits — HOW TO</h3>
 
       <p><strong>Update headcount / Diff HC defaults:</strong> edit <code>defaultState()</code>, in <code>positions:</code> block, change <code>headcount</code> / <code>diffHc</code>. Save, copy to deploy, push.</p>
 
@@ -1325,7 +1390,7 @@
 
       <p><strong>Add a new global:</strong> add to <code>defaultState().globals</code>, add to <code>globalFields</code> array, add migration shim filling default for older state, add <code>&lt;input&gt;</code> in HTML, wire to <code>renderGlobals()</code>.</p>
 
-      <h3>10. Calculation reference (plain language)</h3>
+      <h3>11. Calculation reference (plain language)</h3>
       <p style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:var(--bg); padding:10px; border-radius:6px; line-height:1.6;">
         TCC at Low/Med/High = base + varMax × (mult / 100)<br/>
         Expected variable/hr = varMax × (dist × mult sums) / 10000<br/>
@@ -1343,7 +1408,7 @@
         Raise % at level X = (Scenario TCC at X − Current TCC at X) / Current TCC at X × 100
       </p>
 
-      <h3>11. Known limitations & open questions</h3>
+      <h3>12. Known limitations & open questions</h3>
       <ul>
         <li><strong>Annual ≠ phased.</strong> Tool models annual cost only. Summer is heavier than winter — a May-effective raise costs more than a November-effective one. Use the annual number for budgeting; phasing is a separate conversation.</li>
         <li><strong>Diff HC defaults are guesses</strong> (20%/position). Replace with payroll actuals when available.</li>
@@ -1355,8 +1420,9 @@
         <li><strong>State migration is robust as of v2.7.2.</strong> Missing globals, missing positions, and missing UI-state fields all fall back to defaults. Truly corrupted JSON in localStorage still requires a hard reset.</li>
       </ul>
 
-      <h3>12. Decisions log (newest first)</h3>
+      <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.8 (5/14)</strong> — <strong>Role architecture rebrand.</strong> Renamed "Co-Pilot (Lead In Training)" → just <strong>"Lead In Training"</strong> (drops Co-Pilot terminology entirely; aligns with the job-posting framing that this is a transitional role, not a destination). Added new <strong>Part-Time Lead</strong> position between Lead in Waiting and Jr. Lead, in the ENTRY group. Tool models it as a single blended rate ($20.50 base, $0.75 var) — real structure is two pay buckets (Co-Pilot hours $20 no-var / Lead hours $21 + var) with quarter-wide KPI determining the lead-hour variable rate. Added per-position info tooltips (orange "i" icon) on the three transitional positions explaining the strategy + comp structure. New section 6 in this handoff explaining the role architecture.</li>
         <li><strong>v3.7 (5/14)</strong> — Added <strong>Promo Raise %</strong> column to the position matrix. Shows the % step-up from the previous position's TCC max (Co-Pilot has no prev → "—"; Lead in Waiting skipped when zeroed; HOF compares to Lead General). Hideable via Columns picker; included in CSV. Has inline baseline (vs Current scenario's promo raise) on A/B/C tabs. Group-divider colspan now 20.</li>
         <li><strong>v3.6 (5/14)</strong> — Extended the "vs $X.XX" inline baseline pattern from Base / Var Max to <strong>all comparison columns</strong>: TCC Low/Med/High, Var % (max), Avg $/hr, Annual Cost, True Annual Cost. Visible on A/B/C tabs only; hidden on Current. Makes scenario vs current comparison instant for every value in the row.</li>
         <li><strong>v3.5 (5/14)</strong> — Moved "Lead in Waiting" from the LEADS group into ENTRY so it sits above the LEADS divider. Added <strong>Hide Rows</strong> section in the Columns picker with a "Lead in Waiting" toggle. Hidden rows are visual-only; aggregates still include them.</li>
@@ -1380,7 +1446,7 @@
         <li><strong>v1 (5/8)</strong> — three scenarios pre-loaded. AGM framing initially wrong (confused AGM% of revenue with comp-to-AGM ceiling); corrected mid-build with tooltip flagging three possible cohort reads.</li>
       </ul>
 
-      <h3>13. How to talk to Albert about this project</h3>
+      <h3>14. How to talk to Albert about this project</h3>
       <p>If you're an AI assistant for Paul or Ben opening this doc to help your principal interact with the tool:</p>
       <ul>
         <li><strong>Source HTML in <code>einsteinadmin/emc-projects</code> is canonical.</strong> Deploy repo is downstream — edit source first, copy to deploy, push.</li>
@@ -1404,9 +1470,10 @@
 // DATA
 // =============================================================================
 const POSITIONS = [
-  { id: 'copilot', name: 'Co-Pilot (Lead In Training)', base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
-  { id: 'waiting', name: 'Lead in Waiting', base: 0.00,  varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'entry'  },
-  { id: 'jr',      name: 'Jr. Lead',     base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'copilot',  name: 'Lead In Training', base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
+  { id: 'waiting',  name: 'Lead in Waiting',  base:  0.00, varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'entry'  },
+  { id: 'parttime', name: 'Part-Time Lead',   base: 20.50, varMax: 0.75, headcount:  20, hrsPerYr: 1550, group: 'entry'  },
+  { id: 'jr',       name: 'Jr. Lead',         base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
   { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
   { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
   { id: 'master',  name: 'Master Lead',  base: 20.50, varMax: 3.00, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
@@ -1444,6 +1511,9 @@ function defaultState() {
       waiting: { headcount: 0, diffHc: 0, hrsPerYr: 1550,
         base:   { current: 0.00, A: 0.00, B: 0.00, C: 0.00 },
         varMax: { current: 0.00, A: 0.00, B: 0.00, C: 0.00 } },
+      parttime: { headcount: 20, diffHc: 4, hrsPerYr: 1550,
+        base:   { current: 20.50, A: 20.50, B: 20.50, C: 20.50 },
+        varMax: { current: 0.75,  A: 0.75,  B: 0.75,  C: 0.75  } },
       jr:      { headcount: 21, diffHc: 4, hrsPerYr: 1550,
         base:   { current: 19.50, A: 21.00, B: 21.00, C: 19.50 },
         varMax: { current: 1.75,  A: 2.00,  B: 2.25,  C: 1.75  } },
@@ -1769,6 +1839,37 @@ function renderMatrix() {
     });
   }
 
+  // Per-position info tooltips (strategic context that travels with the tool)
+  const POS_TOOLTIPS = {
+    copilot:
+      '<strong>Lead In Training — not a permanent role.</strong> Recruited to become a Lead. ' +
+      'The pay is intentionally high to attract Lead-quality candidates. ' +
+      'If a hire decides they prefer to stay an entry-level helper long-term, that\'s a mismatch — ' +
+      'this role exists to filter for the upward trajectory, not to be a comfortable end state.<br/><br/>' +
+      '<em>Max time in role: target 3–6 months before promotion / Part-Time Lead / Lead in Waiting.</em>',
+    waiting:
+      '<strong>Lead in Waiting — bridge role (placeholder, not yet formalized).</strong> ' +
+      'For people who completed Lead In Training and the BM has confidence in them, but no Jr. Lead seat is open at their branch yet.<br/><br/>' +
+      'Intent: interim wage between Lead In Training ($20) and Jr. Lead ($21), held for max 3–6 months before either a seat opens, ' +
+      'they transfer to a growing branch, or we have the "this branch can\'t grow you" conversation.<br/><br/>' +
+      '<em>Zeroed in the modeler until the role is formalized — replace base/var/headcount when defined.</em>',
+    parttime:
+      '<strong>Part-Time Lead — two-rate hybrid.</strong> Bridges trained movers who BMs trust partially: ' +
+      'they lead some shifts, co-pilot others.<br/><br/>' +
+      '<strong>Two pay buckets:</strong><br/>' +
+      '• Lead In Training hours: $20/hr base, <em>no</em> variable<br/>' +
+      '• Lead hours: $21/hr base, variable <em>only</em> on lead hours<br/><br/>' +
+      '<strong>Important nuance:</strong> the variable <em>rate</em> on Lead hours is determined by the employee\'s quarterly KPI performance ' +
+      '<em>across the entire quarter</em> (not just the hours they led). So a strong overall quarter pulls up their lead-hour variable rate.<br/><br/>' +
+      'Multi-rate timeclock implementation is non-trivial but figureoutable.<br/><br/>' +
+      '<em>Tool models a blended single rate as a working approximation — refine when the multi-rate clocking is live.</em>',
+  };
+  function posTipHtml(id) {
+    const t = POS_TOOLTIPS[id];
+    if (!t) return '';
+    return `<span class="pos-tip" tabindex="0">i<span class="pos-tip-body">${t}</span></span>`;
+  }
+
   // Helper: previous-position TCC max in a given scenario (skips zeroed rows)
   function prevTccHighFor(posId, scenario) {
     const idx = POSITIONS.findIndex(x => x.id === posId);
@@ -1835,7 +1936,7 @@ function renderMatrix() {
     const trueCostNow = r.annualCost * burdenMultRow;
 
     tr.innerHTML = `
-      <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}</td>
+      <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}${posTipHtml(p.id)}</td>
       <td class="col-headcount"><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
       <td class="col-diffHc"><input class="cell-input${roCls}" type="number" min="0" max="${ps.headcount}" step="1" value="${ps.diffHc || 0}" data-field="diffHc" data-pos="${p.id}" ${ro}/></td>
       <td class="col-hrsPerYr"><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
