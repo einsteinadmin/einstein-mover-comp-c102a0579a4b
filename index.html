@@ -355,12 +355,12 @@
     opacity: 0;
     position: absolute;
     top: 50%;
-    left: calc(100% + 10px);
+    left: calc(100% + 18px);
     transform: translateY(-50%);
     width: 340px;
     background: #1F1F1F;
     color: white;
-    padding: 12px 14px;
+    padding: 13px 16px 13px 20px;
     border-radius: 6px;
     font-size: 12.5px;
     font-weight: 400;
@@ -380,8 +380,12 @@
     top: 50%;
     right: 100%;
     transform: translateY(-50%);
-    border: 6px solid transparent;
+    border: 7px solid transparent;
     border-right-color: #1F1F1F;
+    /* Pull the arrow slightly into the body so there's no visible seam,
+       and place behind body content so it can't render over text */
+    margin-right: -1px;
+    z-index: -1;
   }
   .pos-tip:hover .pos-tip-body, .pos-tip:focus .pos-tip-body { visibility: visible; opacity: 1; }
   .pos-tip .pos-tip-body strong { color: #FFD9A8; }
@@ -1278,7 +1282,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.0).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.1).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1449,6 +1453,7 @@
 
       <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v4.1 (5/14)</strong> — Added <strong>Total PTO Cost</strong> aggregate stat card in the 🚚 Mover Affordability module with per-position day breakdown + Δ vs current. Tooltip formatting hardened: increased icon-to-tooltip gap (10px → 18px), bumped body left padding (14px → 20px), arrow now sits behind body content with z-index −1 to prevent ever rendering over text. Fixes the "Reg → eg / level → vel" clipping when the system cursor overlaps the tooltip's left edge.</li>
         <li><strong>v4.0 (5/14)</strong> — Added <strong>PTO</strong> to the position matrix. Two new columns: <strong>PTO Days</strong> (editable input, shared across scenarios since it's a position-level benefit) and <strong>PTO Cost</strong> (derived, hideable, shows annual dollar cost). Default PTO days: Master Lead 5, Lead General 10, everyone else 0. Cost formula: <code>ptoDays × 8 hrs × base pay</code> (base only, no variable on PTO). Branch differential applies — PTO at Houston/SAA uses baseDiff. PTO cost is rolled into Annual Cost so totals reflect true cost. Mover-view announcement table shows a "PTO Days" row when the selected position has PTO &gt; 0. CSV export gets PTO Days + Annual PTO Cost columns. Position tooltips on Master Lead and Lead General now mention PTO. Group-divider colspan 20 → 22.</li>
         <li><strong>v3.9.2 (5/14)</strong> — Headcount accounting fix: when Part-Time Lead was added in v3.8 (20 HC), those movers were already counted within Lead In Training (147). Pulled them out (147 → 127) so total stays at 255 instead of double-counting to 275. Cleaner formatting on position tooltips (proper paragraphs + lists instead of <code>&lt;br/&gt;</code> spacing) in v3.9.1.</li>
         <li><strong>v3.9 (5/14)</strong> — <strong>Hall of Fame retired as a paid position (LOCKED).</strong> All 14 HoF folks converted to Lead General pay path. Lead General default headcount bumped 11 → 25; Diff HC 2 → 5. Position removed from POSITIONS array; migration shim folds any persisted <code>hof</code> state into <code>general</code> on load. Per-person transition deal (+$1.75 base / variable capped $3.00 vs Lead General max $3.75 = ~7% raise) captured in the Lead General tooltip. Hall of Fame is now an <em>award</em> (swag, selectable PTO, plaques, truck naming, possible one-time bonus) with no pay-band impact.</li>
@@ -2166,6 +2171,19 @@ function renderAggregate() {
       <div class="label">Implied FTEs <span style="font-size:10px;font-weight:400;opacity:0.7">@ ${(cmp.fteBasis || 2080).toLocaleString()} hrs/yr</span></div>
       <div class="big">${cmp.impliedFtes.toFixed(0)}</div>
       <div class="delta">${Math.round(cmp.totalHrs).toLocaleString()} mover-hrs/yr · ${cmp.totalHeadcount > 0 ? (cmp.impliedFtes / cmp.totalHeadcount * 100).toFixed(0) : 0}% of headcount as FTE</div>
+    </div>
+    <div class="stat">
+      <div class="label">Total PTO Cost <span style="font-size:10px;font-weight:400;opacity:0.7">8 hrs × base, by position</span></div>
+      <div class="big">${cmp.totalPto > 0 ? fmt$(cmp.totalPto) : '$0'}</div>
+      <div class="delta">${(() => {
+        const ptoBreakdown = POSITIONS
+          .filter(p => state.positions[p.id] && state.positions[p.id].ptoDays > 0)
+          .map(p => `${p.name.replace(' Lead', '')} ${state.positions[p.id].ptoDays}d`);
+        if (ptoBreakdown.length === 0) return 'No PTO days set on any position';
+        const deltaPto = cmp.totalPto - cur.totalPto;
+        const deltaStr = isCurrent || Math.abs(deltaPto) < 1 ? '' : ' · ' + (deltaPto >= 0 ? '+' : '−') + fmt$(Math.abs(deltaPto)) + ' vs current';
+        return ptoBreakdown.join(' · ') + deltaStr;
+      })()}</div>
     </div>
   `;
 
