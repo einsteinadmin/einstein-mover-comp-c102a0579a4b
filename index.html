@@ -7,6 +7,9 @@
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
 <meta name="referrer" content="no-referrer" />
 <title>Internal Tool — Einstein Moving</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --orange: #EF8B22;
@@ -26,11 +29,13 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: var(--bg);
     color: var(--ink);
     font-size: 14px;
     line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   header {
     background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
@@ -203,14 +208,20 @@
   table.matrix tfoot td.left { background: #F8F8F8; z-index: 3; }
   table.matrix tbody tr:hover td.left { background: #FAFAF7; }
   table.matrix td .cell-input {
-    border: 1px solid transparent;
-    background: transparent;
+    border: 1px solid #E0E0E0;
+    background: #F6F6F6;
     width: 70px;
     text-align: right;
     font-family: inherit;
     font-size: 13px;
     padding: 4px 6px;
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    color: var(--ink);
+  }
+  table.matrix td .cell-input:hover {
+    border-color: #B8B8B8;
+    background: #FAFAFA;
   }
   table.matrix td .cell-input:focus {
     outline: none;
@@ -218,18 +229,25 @@
     background: white;
     box-shadow: 0 0 0 2px var(--orange-soft);
   }
+  /* Read-only inputs (Current tab) — visually distinct from editable */
   table.matrix td .cell-input.readonly {
     color: var(--muted);
-    background: #F8F8F8;
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+  }
+  table.matrix td .cell-input.readonly:hover {
+    background: transparent;
+    border-color: transparent;
   }
   table.matrix td .cell-baseline {
     display: block;
-    font-size: 10.5px;
-    color: #9A9A9A;
+    font-size: 11px;
+    color: #8E8E8E;
     text-align: right;
-    margin-top: 2px;
+    margin-top: 3px;
     padding-right: 6px;
-    line-height: 1.1;
+    line-height: 1.2;
     font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
@@ -1283,7 +1301,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.2).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v4.3).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1454,6 +1472,7 @@
 
       <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v4.3 (5/14)</strong> — Design pass 1 (typography + discoverability). Roboto now explicitly loaded from Google Fonts (was system-font fallback). Matrix input cells now have light gray fill (#F6F6F6) + subtle border, hover state, and white focus state — gives cold-open users an obvious "you can edit this" signal vs. the prior transparent inputs. Cell-baseline subtext bumped 10.5px → 11px for legibility.</li>
         <li><strong>v4.2 (5/14)</strong> — Added <strong>Part-Time Lead</strong> to the Hide Rows section of the Columns picker (sits next to Lead in Waiting). Migration now backfills any new row-hide keys onto older saved state so existing share links don't lose the option.</li>
         <li><strong>v4.1 (5/14)</strong> — Added <strong>Total PTO Cost</strong> aggregate stat card in the 🚚 Mover Affordability module with per-position day breakdown + Δ vs current. Tooltip formatting hardened: increased icon-to-tooltip gap (10px → 18px), bumped body left padding (14px → 20px), arrow now sits behind body content with z-index −1 to prevent ever rendering over text. Fixes the "Reg → eg / level → vel" clipping when the system cursor overlaps the tooltip's left edge.</li>
         <li><strong>v4.0 (5/14)</strong> — Added <strong>PTO</strong> to the position matrix. Two new columns: <strong>PTO Days</strong> (editable input, shared across scenarios since it's a position-level benefit) and <strong>PTO Cost</strong> (derived, hideable, shows annual dollar cost). Default PTO days: Master Lead 5, Lead General 10, everyone else 0. Cost formula: <code>ptoDays × 8 hrs × base pay</code> (base only, no variable on PTO). Branch differential applies — PTO at Houston/SAA uses baseDiff. PTO cost is rolled into Annual Cost so totals reflect true cost. Mover-view announcement table shows a "PTO Days" row when the selected position has PTO &gt; 0. CSV export gets PTO Days + Annual PTO Cost columns. Position tooltips on Master Lead and Lead General now mention PTO. Group-divider colspan 20 → 22.</li>
