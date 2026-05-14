@@ -1194,7 +1194,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.5).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.6).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1292,7 +1292,7 @@
         <li><strong>"📖 How to use"</strong> — user-facing walkthrough modal</li>
         <li><strong>"🔧 Handoff doc"</strong> — this modal</li>
         <li><strong>"📊 Columns ▾"</strong> picker — toggle any of 11 columns. Presets: Show all / Essentials only. Always-visible: Position, Base, Var Max, Annual Cost</li>
-        <li><strong>Inline baseline values</strong> — small "vs $X.XX" under each editable input on A/B/C tabs only</li>
+        <li><strong>Inline baseline values</strong> — small "vs $X.XX" under each comparison cell (Base, Var Max, TCC Low/Med/High, Var %, Avg $/hr, Annual Cost, True Annual Cost) on A/B/C tabs only. Shows the Current value for instant compare.</li>
         <li><strong>Sticky Position column</strong> — first column pins on horizontal scroll</li>
         <li><strong>"📎 Copy share link"</strong> — encodes full state to URL, copies to clipboard. Recipient sees exactly your view</li>
         <li><strong>💾 Saved Versions</strong> — name + snapshot the full state for later reload (Save / Load / Rename / Delete / per-version Share). Stored in localStorage under <code>einstein-mover-comp-saves-v1</code>. Export-all-as-JSON for cross-machine backup.</li>
@@ -1353,6 +1353,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.6 (5/14)</strong> — Extended the "vs $X.XX" inline baseline pattern from Base / Var Max to <strong>all comparison columns</strong>: TCC Low/Med/High, Var % (max), Avg $/hr, Annual Cost, True Annual Cost. Visible on A/B/C tabs only; hidden on Current. Makes scenario vs current comparison instant for every value in the row.</li>
         <li><strong>v3.5 (5/14)</strong> — Moved "Lead in Waiting" from the LEADS group into ENTRY so it sits above the LEADS divider. Added <strong>Hide Rows</strong> section in the Columns picker with a "Lead in Waiting" toggle. Hidden rows are visual-only; aggregates still include them.</li>
         <li><strong>v3.4 (5/13)</strong> — Added <strong>Total Cost Δ (loaded)</strong> tile in Mover Affordability — leads with the signed dollar delta of loaded mover cost between Current and the active scenario. Tones warn/good based on direction; sub-line shows % and the parallel wages-only delta.</li>
         <li><strong>v3.3 (5/13)</strong> — Baked Cameron's working state as the new defaults (revenue $26.4M, AGM 53%, manager comp $2.8M, all positions hrs/yr 1,550, lead var-max A/B re-tuned). FTE basis default 2,080 → <strong>1,820</strong> (35 hr/wk × 52 wks). Migration shim now repairs <code>fteBasis ≤ 0</code> to default.</li>
@@ -1811,6 +1812,13 @@ function renderMatrix() {
     const ro = isLocked ? 'readonly' : '';
     const roCls = isLocked ? ' readonly' : '';
     const tr = document.createElement('tr');
+    // Baseline (Current scenario) values for all comparison columns
+    const sub = (txt) => cur ? `<div class="cell-baseline">${txt}</div>` : '';
+    const curVarPct = cur && cur.tccHigh > 0 ? (cur.varMax / cur.tccHigh * 100).toFixed(1) + '%' : '—';
+    const burdenMultRow = 1 + (state.globals.burdenPct || 0) / 100;
+    const curTrueCost = cur ? cur.annualCost * burdenMultRow : 0;
+    const trueCostNow = r.annualCost * burdenMultRow;
+
     tr.innerHTML = `
       <td class="left pos-name${p.group === 'legacy' ? ' hof' : ''}">${p.name}</td>
       <td class="col-headcount"><input class="cell-input${roCls}" type="number" min="0" step="1" value="${ps.headcount}" data-field="headcount" data-pos="${p.id}" ${ro}/></td>
@@ -1818,19 +1826,19 @@ function renderMatrix() {
       <td class="col-hrsPerYr"><input class="cell-input${roCls}" type="number" min="0" step="50" value="${ps.hrsPerYr}" data-field="hrsPerYr" data-pos="${p.id}" ${ro}/></td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.base.toFixed(2)}" data-field="base" data-pos="${p.id}" ${ro}/>${baseBaseline}</td>
       <td><input class="cell-input${roCls}" type="number" min="0" step="0.25" value="${r.varMax.toFixed(2)}" data-field="varMax" data-pos="${p.id}" ${ro}/>${varBaseline}</td>
-      <td class="col-tccLow">${fmt$2(r.tccLow)}</td>
-      <td class="col-tccMed">${fmt$2(r.tccMed)}</td>
-      <td class="col-tccHigh">${fmt$2(r.tccHigh)}</td>
-      <td class="col-varPct">${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}</td>
+      <td class="col-tccLow">${fmt$2(r.tccLow)}${sub('vs ' + (cur ? fmt$2(cur.tccLow) : '—'))}</td>
+      <td class="col-tccMed">${fmt$2(r.tccMed)}${sub('vs ' + (cur ? fmt$2(cur.tccMed) : '—'))}</td>
+      <td class="col-tccHigh">${fmt$2(r.tccHigh)}${sub('vs ' + (cur ? fmt$2(cur.tccHigh) : '—'))}</td>
+      <td class="col-varPct">${r.tccHigh > 0 ? (r.varMax / r.tccHigh * 100).toFixed(1) + '%' : '—'}${sub('vs ' + curVarPct)}</td>
       ${raiseCell(rL, 'col-raiseL')}
       ${raiseCell(rM, 'col-raiseM')}
       ${raiseCell(rH, 'col-raiseH')}
       ${deltaCell('low', 'col-deltaLow')}
       ${deltaCell('med', 'col-deltaMed')}
       ${deltaCell('high', 'col-deltaMax')}
-      <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}</td>
-      <td>${fmt$(r.annualCost)}</td>
-      <td class="col-trueCost">${fmt$(r.annualCost * (1 + (state.globals.burdenPct || 0) / 100))}</td>
+      <td class="col-avgPerHr">${fmt$2(r.avgPerHr)}${sub('vs ' + (cur ? fmt$2(cur.avgPerHr) : '—'))}</td>
+      <td>${fmt$(r.annualCost)}${sub('vs ' + (cur ? fmt$(cur.annualCost) : '—'))}</td>
+      <td class="col-trueCost">${fmt$(trueCostNow)}${sub('vs ' + (cur ? fmt$(curTrueCost) : '—'))}</td>
     `;
     tbody.appendChild(tr);
   });
