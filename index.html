@@ -992,6 +992,10 @@
             <label><input type="checkbox" data-col="avgPerHr" /> Avg $/hr</label>
             <label><input type="checkbox" data-col="trueCost" /> True Annual Cost</label>
           </div>
+          <div class="col-popover-group">
+            <div class="col-popover-title" style="margin:0 0 6px;">Hide Rows</div>
+            <label><input type="checkbox" data-row="waiting" /> Lead in Waiting</label>
+          </div>
           <div class="actions">
             <a id="cols-show-all">Show all</a>
             <span style="color:var(--muted);">·</span>
@@ -1190,7 +1194,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-13 (v3.4).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.5).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1227,7 +1231,7 @@
       <p><strong>Eight positions</strong> in display order (id · name · group · default base · default var max):</p>
       <ul>
         <li><code>copilot</code> · Co-Pilot (Lead In Training) · entry · $18.00 · $1.50</li>
-        <li><code>waiting</code> · Lead in Waiting · lead · $0.00 · $0.00 <em>(new role, zeroed — see note below)</em></li>
+        <li><code>waiting</code> · Lead in Waiting · <strong>entry</strong> · $0.00 · $0.00 <em>(sits above the LEADS divider; hideable via Columns picker → Hide Rows)</em></li>
         <li><code>jr</code> · Jr. Lead · lead · $19.50 · $1.75</li>
         <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
         <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
@@ -1349,6 +1353,7 @@
 
       <h3>12. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.5 (5/14)</strong> — Moved "Lead in Waiting" from the LEADS group into ENTRY so it sits above the LEADS divider. Added <strong>Hide Rows</strong> section in the Columns picker with a "Lead in Waiting" toggle. Hidden rows are visual-only; aggregates still include them.</li>
         <li><strong>v3.4 (5/13)</strong> — Added <strong>Total Cost Δ (loaded)</strong> tile in Mover Affordability — leads with the signed dollar delta of loaded mover cost between Current and the active scenario. Tones warn/good based on direction; sub-line shows % and the parallel wages-only delta.</li>
         <li><strong>v3.3 (5/13)</strong> — Baked Cameron's working state as the new defaults (revenue $26.4M, AGM 53%, manager comp $2.8M, all positions hrs/yr 1,550, lead var-max A/B re-tuned). FTE basis default 2,080 → <strong>1,820</strong> (35 hr/wk × 52 wks). Migration shim now repairs <code>fteBasis ≤ 0</code> to default.</li>
         <li><strong>v3.2 (5/13)</strong> — Added <strong>Saved Versions</strong> system. Snapshot the full state (globals + all scenarios + UI) under a name; reload later to restore exactly. Per-save share-link button generates a URL pointing at the saved state. Export-all-as-JSON / Import-from-JSON for cross-machine portability. Stored in localStorage at <code>einstein-mover-comp-saves-v1</code>, separate from the live working state.</li>
@@ -1394,7 +1399,7 @@
 // =============================================================================
 const POSITIONS = [
   { id: 'copilot', name: 'Co-Pilot (Lead In Training)', base: 18.00, varMax: 1.50, headcount: 147, hrsPerYr: 1700, group: 'entry'  },
-  { id: 'waiting', name: 'Lead in Waiting', base: 0.00,  varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'lead'   },
+  { id: 'waiting', name: 'Lead in Waiting', base: 0.00,  varMax: 0.00, headcount:   0, hrsPerYr: 1900, group: 'entry'  },
   { id: 'jr',      name: 'Jr. Lead',     base: 19.50, varMax: 1.75, headcount:  21, hrsPerYr: 1900, group: 'lead'   },
   { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
   { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
@@ -1464,6 +1469,9 @@ function defaultState() {
       deltaLow: false, deltaMed: false, deltaMax: false,
       avgPerHr: false, trueCost: false,
     },
+    hiddenRows: {
+      waiting: false,
+    },
   };
 }
 const HIDEABLE_COLS = ['headcount','diffHc','hrsPerYr','tccLow','tccMed','tccHigh','varPct','raiseL','raiseM','raiseH','deltaLow','deltaMed','deltaMax','avgPerHr','trueCost'];
@@ -1524,6 +1532,8 @@ function migrateState(s) {
     if (s.hideRaiseM) s.hiddenCols.raiseM = true;
     delete s.hideRaiseM;
   }
+  // v3.5: hiddenRows introduced — per-position row hide toggles
+  if (!s.hiddenRows) s.hiddenRows = Object.assign({}, def.hiddenRows);
   return s;
 }
 
@@ -1745,8 +1755,18 @@ function renderMatrix() {
   const btn = document.getElementById('cols-btn');
   if (btn) btn.classList.toggle('active', hiddenCount > 0);
 
+  // Sync row-hide checkboxes
+  if (state.hiddenRows) {
+    Object.keys(state.hiddenRows).forEach(rowId => {
+      const cb = document.querySelector('#cols-popover input[data-row="' + rowId + '"]');
+      if (cb) cb.checked = !!state.hiddenRows[rowId];
+    });
+  }
+
   let lastGroup = null;
   POSITIONS.forEach(p => {
+    // Skip rows marked hidden in state.hiddenRows
+    if (state.hiddenRows && state.hiddenRows[p.id]) return;
     if (p.group !== lastGroup) {
       lastGroup = p.group;
       const groupRow = document.createElement('tr');
@@ -2240,6 +2260,17 @@ document.getElementById('apply-bulk-diff').addEventListener('click', () => {
   // Esc closes
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen()) close();
+  });
+
+  // Per-row checkbox change (hide entire position row)
+  pop.querySelectorAll('input[type="checkbox"][data-row]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const rowId = e.target.dataset.row;
+      if (!state.hiddenRows) state.hiddenRows = {};
+      state.hiddenRows[rowId] = e.target.checked;
+      saveState();
+      renderMatrix();
+    });
   });
 
   // Per-column checkbox change
