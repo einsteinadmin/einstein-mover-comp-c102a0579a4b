@@ -384,6 +384,24 @@
   .pos-tip:hover .pos-tip-body, .pos-tip:focus .pos-tip-body { visibility: visible; opacity: 1; }
   .pos-tip .pos-tip-body strong { color: #FFD9A8; }
   .pos-tip .pos-tip-body em { color: #C8E6B5; font-style: normal; }
+  .pos-tip .pos-tip-body p { margin: 0 0 9px; }
+  .pos-tip .pos-tip-body p:last-child { margin-bottom: 0; }
+  .pos-tip .pos-tip-body ul { margin: 4px 0 9px; padding-left: 18px; }
+  .pos-tip .pos-tip-body li { margin: 2px 0; }
+  .pos-tip .pos-tip-body .ptip-h {
+    display: block;
+    color: #FFD9A8;
+    font-weight: 700;
+    font-size: 13px;
+    margin: 0 0 6px;
+  }
+  .pos-tip .pos-tip-body .ptip-sub {
+    display: block;
+    color: #B8B8B8;
+    font-style: italic;
+    margin-top: 8px;
+    font-size: 12px;
+  }
   table.matrix .delta-pos { color: var(--green); font-weight: 600; }
   table.matrix .delta-neg { color: var(--red); font-weight: 600; }
   table.matrix .delta-zero { color: var(--muted); }
@@ -1847,38 +1865,38 @@ function renderMatrix() {
   // Per-position info tooltips (strategic context that travels with the tool)
   const POS_TOOLTIPS = {
     copilot:
-      '<strong>Lead In Training — not a permanent role.</strong> Recruited to become a Lead. ' +
-      'The pay is intentionally high to attract Lead-quality candidates. ' +
-      'If a hire decides they prefer to stay an entry-level helper long-term, that\'s a mismatch — ' +
-      'this role exists to filter for the upward trajectory, not to be a comfortable end state.<br/><br/>' +
-      '<em>Max time in role: target 3–6 months before promotion / Part-Time Lead / Lead in Waiting.</em>',
+      '<span class="ptip-h">Lead In Training — not a permanent role</span>' +
+      '<p>Recruited to become a Lead. Pay is intentionally high to attract Lead-quality candidates.</p>' +
+      '<p>If a hire prefers to stay an entry-level helper long-term, that\'s a mismatch — this role filters for upward trajectory, not a comfortable end state.</p>' +
+      '<span class="ptip-sub">Target time in role: 3–6 months before promotion, Part-Time Lead, or Lead in Waiting.</span>',
     waiting:
-      '<strong>Lead in Waiting — bridge role (placeholder, not yet formalized).</strong> ' +
-      'For people who completed Lead In Training and the BM has confidence in them, but no Jr. Lead seat is open at their branch yet.<br/><br/>' +
-      'Intent: interim wage between Lead In Training ($20) and Jr. Lead ($21), held for max 3–6 months before either a seat opens, ' +
-      'they transfer to a growing branch, or we have the "this branch can\'t grow you" conversation.<br/><br/>' +
-      '<em>Zeroed in the modeler until the role is formalized — replace base/var/headcount when defined.</em>',
+      '<span class="ptip-h">Lead in Waiting — bridge role</span>' +
+      '<p>For people who completed Lead In Training and the BM has confidence in them, but no Jr. Lead seat is open at their branch yet.</p>' +
+      '<p>Intent: interim wage between Lead In Training ($20) and Jr. Lead ($21). Held for max 3–6 months before either a seat opens, they transfer to a growing branch, or the "this branch can\'t grow you" conversation.</p>' +
+      '<span class="ptip-sub">Placeholder — zeroed in the modeler until the role is formalized.</span>',
     parttime:
-      '<strong>Part-Time Lead — two-rate hybrid.</strong> Bridges trained movers who BMs trust partially: ' +
-      'they lead some shifts, co-pilot others.<br/><br/>' +
-      '<strong>Two pay buckets:</strong><br/>' +
-      '• Lead In Training hours: $20/hr base, <em>no</em> variable<br/>' +
-      '• Lead hours: $21/hr base, variable <em>only</em> on lead hours<br/><br/>' +
-      '<strong>Important nuance:</strong> the variable <em>rate</em> on Lead hours is determined by the employee\'s quarterly KPI performance ' +
-      '<em>across the entire quarter</em> (not just the hours they led). So a strong overall quarter pulls up their lead-hour variable rate.<br/><br/>' +
-      'Multi-rate timeclock implementation is non-trivial but figureoutable.<br/><br/>' +
-      '<em>Tool models a blended single rate as a working approximation — refine when the multi-rate clocking is live.</em>',
+      '<span class="ptip-h">Part-Time Lead — two-rate hybrid</span>' +
+      '<p>Bridges trained movers who BMs trust partially: they lead some shifts, co-pilot others.</p>' +
+      '<p><strong>Two pay buckets:</strong></p>' +
+      '<ul>' +
+        '<li>Lead In Training hours: $20/hr base, <em>no</em> variable</li>' +
+        '<li>Lead hours: $21/hr base, variable <em>only</em> on lead hours</li>' +
+      '</ul>' +
+      '<p><strong>Nuance:</strong> the variable <em>rate</em> on lead hours is determined by the employee\'s quarterly KPI performance <em>across the entire quarter</em> (not just the hours they led). A strong overall quarter pulls up their lead-hour variable rate.</p>' +
+      '<p>Multi-rate timeclock implementation is non-trivial but figureoutable.</p>' +
+      '<span class="ptip-sub">Tool models a single blended rate — refine when multi-rate clocking is live.</span>',
     general:
-      '<strong>Lead General — top of the Lead ladder.</strong><br/><br/>' +
-      '<strong>v3.9 decision (LOCKED):</strong> Hall of Fame retired as a paid position. All 14 existing HoF folks converted to Lead General pay path. ' +
-      'Default headcount bumped from 11 → 25 to reflect the merge.<br/><br/>' +
-      '<strong>Transition deal for the 14 converting HoF folks (per-person, one-time):</strong><br/>' +
-      '• +$1.75 base bump (HoF → Lead General path)<br/>' +
-      '• Variable reduced from $3.75 max to $3.00 max<br/>' +
-      '• Net effect: ~7% raise vs prior HoF max TCC ($23.43 → $25.25) — "guaranteed pay up"<br/><br/>' +
-      'The Lead General pay band itself is unchanged ($20.50 base / $3.75 var max). The deal is a personal adjustment for the 14 converting, not a structural change to the role.<br/><br/>' +
-      '<strong>Hall of Fame is now an award, not a pay band</strong> — earned by Lead Generals via swag, selectable PTO days, plaques, ' +
-      'truck naming, possible one-time bonus, HR variable tracking. No pay impact.',
+      '<span class="ptip-h">Lead General — top of the Lead ladder</span>' +
+      '<p><strong>v3.9 decision (LOCKED):</strong> Hall of Fame retired as a paid position. All 14 HoF folks converted to the Lead General pay path; headcount bumped 11 → 25.</p>' +
+      '<p><strong>Transition deal (per-person, one-time):</strong></p>' +
+      '<ul>' +
+        '<li>+$1.75 base bump (HoF → Lead General path)</li>' +
+        '<li>Variable capped at $3.00 (vs Lead General max $3.75)</li>' +
+        '<li>Net: ~7% raise vs prior HoF max TCC ($23.43 → $25.25) — "guaranteed pay up"</li>' +
+      '</ul>' +
+      '<p>The Lead General pay band itself is unchanged ($20.50 base / $3.75 var max). The deal is a personal adjustment for the 14 converting, not a structural change to the role.</p>' +
+      '<p><strong>Hall of Fame is now an award, not a pay band</strong> — earned by Lead Generals via swag, selectable PTO days, plaques, truck naming, possible one-time bonus, HR variable tracking.</p>' +
+      '<span class="ptip-sub">No pay impact from HoF — purely recognition.</span>',
   };
   function posTipHtml(id) {
     const t = POS_TOOLTIPS[id];
