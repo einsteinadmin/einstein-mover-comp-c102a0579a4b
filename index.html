@@ -1252,7 +1252,7 @@
     </div>
     <div class="modal-body">
 
-      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.8).</em></div>
+      <div class="callout"><strong>For Paul, Ben Young, or any AI assistant working on this project on their behalf.</strong> This is the canonical in-tool reference. Mirror copy lives at <code>Supporting Projects/Compensation/projects/Mover Compensation Review May 2026/HANDOFF.md</code> in the <code>einsteinadmin/emc-projects</code> repo. <strong>When the tool changes materially, update BOTH this modal and HANDOFF.md.</strong><br/><br/><em>Last updated: 2026-05-14 (v3.9).</em></div>
 
       <h3>1. What this is</h3>
       <p>A single-page HTML scenario modeler for Einstein Moving Company's mover compensation. Users edit base + variable pay per position across three "what-if" scenarios (A, B, C), and see live impact on annual mover comp, gross margin, comp-to-revenue ratios, and what an individual mover's announcement looks like at any branch tier. The tool exists to help Cameron, Paul, and Ben argue out compensation moves with numbers behind both sides of the debate, ahead of locking the May 2026 cycle.</p>
@@ -1286,7 +1286,7 @@
       <p><strong>Calc.</strong> Two pure functions: <code>calcPosition(posId, scenario)</code> returns per-position economics. <code>calcScenarioTotals(scenario)</code> rolls up to company totals. No state mutation — easy to reason about.</p>
 
       <h3>5. Data model — positions, scenarios, globals</h3>
-      <p><strong>Nine positions</strong> in display order (id · name · group · default base · default var max):</p>
+      <p><strong>Eight positions</strong> in display order (id · name · group · default base · default var max):</p>
       <ul>
         <li><code>copilot</code> · Lead In Training · entry · $18.00 · $1.50 <em>(renamed from Co-Pilot in v3.8 — explicit "this is transitional, not a destination" framing)</em></li>
         <li><code>waiting</code> · Lead in Waiting · entry · $0.00 · $0.00 <em>(placeholder for trained movers awaiting an open Jr. Lead seat; hideable via Columns picker → Hide Rows)</em></li>
@@ -1295,10 +1295,10 @@
         <li><code>reg</code> · Regular Lead · lead · $20.00 · $2.00</li>
         <li><code>sr</code> · Sr. Lead · lead · $20.50 · $2.25</li>
         <li><code>master</code> · Master Lead · lead · $20.50 · $3.00</li>
-        <li><code>general</code> · Lead General · lead · $20.50 · $3.75</li>
-        <li><code>hof</code> · HOF (legacy) · legacy · $21.68 · $1.75</li>
+        <li><code>general</code> · Lead General · lead · $20.50 · $3.75 <em>(absorbed the 14 HOF folks in v3.9 — HC 11 → 25)</em></li>
       </ul>
-      <p><strong>Headcount defaults</strong>: Lead In Training 147 / Lead in Waiting 0 / Part-Time Lead 20 / Jr 21 / Reg 32 / Sr 15 / Master 15 / General 11 / HOF 14. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended).</p>
+      <p><strong>Headcount defaults</strong>: Lead In Training 147 / Lead in Waiting 0 / Part-Time Lead 20 / Jr 21 / Reg 32 / Sr 15 / Master 15 / General 25. Total 275. <strong>Diff HC</strong> seeded at ~20% per position (Houston + SAA placeholder). <strong>Hrs/yr</strong>: 1,550 across all positions (blended).</p>
+      <p><strong>Hall of Fame</strong> is retired as a paid position (v3.9). It's now an <em>award</em> earned by Lead Generals — swag, selectable PTO days, plaques, truck naming, possible one-time bonus, HR variable tracking. <strong>No pay impact</strong>; the tool no longer models it.</p>
       <p><strong>Hover the orange "i" icon next to each transitional position name</strong> (Lead In Training, Lead in Waiting, Part-Time Lead) for the strategic rationale and the comp structure details.</p>
       <p><strong>Lead in Waiting</strong> is a forward-looking placeholder for a new role between Co-Pilot and Jr. Lead. Zeroed across all four scenarios in v2.7 — fill in base/var/headcount when the role is defined and we want to model its cost.</p>
 
@@ -1333,6 +1333,7 @@
         <li><strong>Part-Time Lead</strong> — hybrid role for movers who completed training and the BM has partial confidence in. Leads some shifts (paid $21/hr base + variable on lead hours only), co-pilots others (paid $20/hr base, no variable). <strong>Important nuance:</strong> the variable <em>rate</em> on lead hours is determined by the employee's quarterly KPI performance <em>across the entire quarter</em> (not just the hours they led) — so a strong overall quarter pulls up their lead-hour variable rate. Multi-rate timeclock implementation is non-trivial but figureoutable.</li>
       </ul>
       <p><strong>Why this matters for the comp model:</strong> these three roles are how the company sustains its "no permanent helpers" growth strategy. The tool currently models all three with single blended rates as a working approximation. When Lead in Waiting is formalized and Part-Time Lead's multi-rate clocking is in production, the model should split these into actual two-bucket cost calcs.</p>
+      <p><strong>Hall of Fame — retired as a paid position in v3.9.</strong> All 14 HoF folks were converted to Lead General pay path; Lead General headcount default bumped from 11 to 25. The per-person transition deal: +$1.75 base bump (over standard Lead General $20.50 → $22.25) and variable capped at $3.00 (vs Lead General max $3.75), netting ~7% raise vs prior HoF max TCC. The role's pay band itself is unchanged. HoF is now an <em>award</em> — swag, selectable PTO days, plaques, truck naming, possible one-time bonus — earned by Lead Generals with no pay-band impact.</p>
 
       <h3>7. Branch differential math</h3>
       <p>For each position, headcount splits into two cohorts:</p>
@@ -1422,6 +1423,7 @@
 
       <h3>13. Decisions log (newest first)</h3>
       <ul>
+        <li><strong>v3.9 (5/14)</strong> — <strong>Hall of Fame retired as a paid position (LOCKED).</strong> All 14 HoF folks converted to Lead General pay path. Lead General default headcount bumped 11 → 25; Diff HC 2 → 5. Position removed from POSITIONS array; migration shim folds any persisted <code>hof</code> state into <code>general</code> on load. Per-person transition deal (+$1.75 base / variable capped $3.00 vs Lead General max $3.75 = ~7% raise) captured in the Lead General tooltip. Hall of Fame is now an <em>award</em> (swag, selectable PTO, plaques, truck naming, possible one-time bonus) with no pay-band impact.</li>
         <li><strong>v3.8 (5/14)</strong> — <strong>Role architecture rebrand.</strong> Renamed "Co-Pilot (Lead In Training)" → just <strong>"Lead In Training"</strong> (drops Co-Pilot terminology entirely; aligns with the job-posting framing that this is a transitional role, not a destination). Added new <strong>Part-Time Lead</strong> position between Lead in Waiting and Jr. Lead, in the ENTRY group. Tool models it as a single blended rate ($20.50 base, $0.75 var) — real structure is two pay buckets (Co-Pilot hours $20 no-var / Lead hours $21 + var) with quarter-wide KPI determining the lead-hour variable rate. Added per-position info tooltips (orange "i" icon) on the three transitional positions explaining the strategy + comp structure. New section 6 in this handoff explaining the role architecture.</li>
         <li><strong>v3.7 (5/14)</strong> — Added <strong>Promo Raise %</strong> column to the position matrix. Shows the % step-up from the previous position's TCC max (Co-Pilot has no prev → "—"; Lead in Waiting skipped when zeroed; HOF compares to Lead General). Hideable via Columns picker; included in CSV. Has inline baseline (vs Current scenario's promo raise) on A/B/C tabs. Group-divider colspan now 20.</li>
         <li><strong>v3.6 (5/14)</strong> — Extended the "vs $X.XX" inline baseline pattern from Base / Var Max to <strong>all comparison columns</strong>: TCC Low/Med/High, Var % (max), Avg $/hr, Annual Cost, True Annual Cost. Visible on A/B/C tabs only; hidden on Current. Makes scenario vs current comparison instant for every value in the row.</li>
@@ -1477,8 +1479,7 @@ const POSITIONS = [
   { id: 'reg',     name: 'Regular Lead', base: 20.00, varMax: 2.00, headcount:  32, hrsPerYr: 1900, group: 'lead'   },
   { id: 'sr',      name: 'Sr. Lead',     base: 20.50, varMax: 2.25, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
   { id: 'master',  name: 'Master Lead',  base: 20.50, varMax: 3.00, headcount:  15, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'general', name: 'Lead General', base: 20.50, varMax: 3.75, headcount:  11, hrsPerYr: 1900, group: 'lead'   },
-  { id: 'hof',     name: 'HOF (legacy)', base: 21.68, varMax: 1.75, headcount:  14, hrsPerYr: 1900, group: 'legacy' },
+  { id: 'general', name: 'Lead General', base: 20.50, varMax: 3.75, headcount:  25, hrsPerYr: 1900, group: 'lead'   },
 ];
 
 const SCENARIOS = ['current', 'A', 'B', 'C'];
@@ -1526,12 +1527,9 @@ function defaultState() {
       master:  { headcount: 15, diffHc: 3, hrsPerYr: 1550,
         base:   { current: 20.50, A: 22.00, B: 22.00, C: 20.50 },
         varMax: { current: 3.00,  A: 3.25,  B: 3.50,  C: 3.00  } },
-      general: { headcount: 11, diffHc: 2, hrsPerYr: 1550,
+      general: { headcount: 25, diffHc: 5, hrsPerYr: 1550,
         base:   { current: 20.50, A: 23.00, B: 23.00, C: 20.50 },
         varMax: { current: 3.75,  A: 3.25,  B: 3.75,  C: 3.75  } },
-      hof:     { headcount: 14, diffHc: 3, hrsPerYr: 1550,
-        base:   { current: 21.68, A: 21.68, B: 21.68, C: 21.68 },
-        varMax: { current: 1.75,  A: 1.75,  B: 1.75,  C: 1.75  } },
     },
     activeTab: 'A',
     moverPosition: 'copilot',
@@ -1610,6 +1608,13 @@ function migrateState(s) {
   }
   // v3.5: hiddenRows introduced — per-position row hide toggles
   if (!s.hiddenRows) s.hiddenRows = Object.assign({}, def.hiddenRows);
+  // v3.9: HoF retired as a paid position — fold any persisted hof state into Lead General
+  // and drop the hof entry. Pay defaults for Lead General are unchanged; only HC + Diff HC merge.
+  if (s.positions && s.positions.hof && s.positions.general) {
+    s.positions.general.headcount = (s.positions.general.headcount || 0) + (s.positions.hof.headcount || 0);
+    s.positions.general.diffHc    = (s.positions.general.diffHc    || 0) + (s.positions.hof.diffHc    || 0);
+    delete s.positions.hof;
+  }
   return s;
 }
 
@@ -1863,6 +1868,17 @@ function renderMatrix() {
       '<em>across the entire quarter</em> (not just the hours they led). So a strong overall quarter pulls up their lead-hour variable rate.<br/><br/>' +
       'Multi-rate timeclock implementation is non-trivial but figureoutable.<br/><br/>' +
       '<em>Tool models a blended single rate as a working approximation — refine when the multi-rate clocking is live.</em>',
+    general:
+      '<strong>Lead General — top of the Lead ladder.</strong><br/><br/>' +
+      '<strong>v3.9 decision (LOCKED):</strong> Hall of Fame retired as a paid position. All 14 existing HoF folks converted to Lead General pay path. ' +
+      'Default headcount bumped from 11 → 25 to reflect the merge.<br/><br/>' +
+      '<strong>Transition deal for the 14 converting HoF folks (per-person, one-time):</strong><br/>' +
+      '• +$1.75 base bump (HoF → Lead General path)<br/>' +
+      '• Variable reduced from $3.75 max to $3.00 max<br/>' +
+      '• Net effect: ~7% raise vs prior HoF max TCC ($23.43 → $25.25) — "guaranteed pay up"<br/><br/>' +
+      'The Lead General pay band itself is unchanged ($20.50 base / $3.75 var max). The deal is a personal adjustment for the 14 converting, not a structural change to the role.<br/><br/>' +
+      '<strong>Hall of Fame is now an award, not a pay band</strong> — earned by Lead Generals via swag, selectable PTO days, plaques, ' +
+      'truck naming, possible one-time bonus, HR variable tracking. No pay impact.',
   };
   function posTipHtml(id) {
     const t = POS_TOOLTIPS[id];
